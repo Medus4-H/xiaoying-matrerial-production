@@ -82,6 +82,8 @@ backend：Java 21、Boot 3.5.16、MyBatis Starter 3.0.5、Flyway；MySQL 8.4.7�
 
 建议使用单独的 Compose 项目与端口演示，避免影响已有资料。以下命令启用 demo 的页面模拟选项，并将生成阶段设为 15 秒，便于观察；变更前端构建变量需要重建镜像：
 
+**浏览器会话隔离：**不同端口的 `localhost` 共享同名 Cookie；仅更换 Compose 项目和端口不会隔离浏览器身份。建议使用单独的浏览器配置验收；或者在首次启动新的独立项目时设置不同的 `SESSION_COOKIE_NAME`，并在后续管理该项目的命令中保持一致。不要直接更改已有项目的 Cookie 名来冒充迁移：原访客会话可能暂时无法识别，未注册访客在原会话丢失后无法恢复。
+
 ```sh
 FRONTEND_PORT=3109 NEXT_PUBLIC_SHOW_SIMULATION_CONTROLS=true TASK_GENERATE_DELAY_MS=15000 \
   docker compose -p xiaoying-demo up --build -d --wait
