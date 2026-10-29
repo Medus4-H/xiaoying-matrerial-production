@@ -11,7 +11,9 @@ import { TaskCard } from "./TaskCard";
 export function TaskHistory({ templateId }: { templateId?: string }) {
   const identity = useIdentity();
   const { tracker, state } = useTaskTracker();
-  const [page, setPage] = useState(1);
+  const scope = `${identity.user?.id ?? ""}:${identity.epoch}:${templateId ?? ""}`;
+  const [pagination, setPagination] = useState({ scope, page: 1 });
+  const page = pagination.scope === scope ? pagination.page : 1;
   const pageSize = appConfig.taskHistoryPageSize;
   const history = useQuery({
     queryKey: [
@@ -120,7 +122,7 @@ export function TaskHistory({ templateId }: { templateId?: string }) {
           <button
             type="button"
             disabled={page <= 1}
-            onClick={() => setPage((value) => value - 1)}
+            onClick={() => setPagination({ scope, page: page - 1 })}
           >
             上一页
           </button>
@@ -130,7 +132,7 @@ export function TaskHistory({ templateId }: { templateId?: string }) {
           <button
             type="button"
             disabled={page >= pages}
-            onClick={() => setPage((value) => value + 1)}
+            onClick={() => setPagination({ scope, page: page + 1 })}
           >
             下一页
           </button>

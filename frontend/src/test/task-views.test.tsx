@@ -416,6 +416,56 @@ test("switching account in the same tab shows only the new account history", asy
   expect(taskLink("only-a")).toBeNull();
 });
 
+test("switching accounts resets history pagination to the first page", async () => {
+  let current = "a";
+  const profile = (id: string) => ({
+    id,
+    displayName: `账号 ${id}`,
+    type: "ACCOUNT",
+    expiresAt: "2099-01-01T00:00:00Z",
+  });
+  server.use(
+    http.get("*/api/me", () => HttpResponse.json(profile(current))),
+    http.get("*/api/tasks", ({ request }) => {
+      const page = Number(new URL(request.url).searchParams.get("page"));
+      const total = current === "a" ? 21 : 1;
+      const items =
+        page === 1 || current === "a"
+          ? [task(`${current}-page-${page}`, "SUCCEEDED")]
+          : [];
+      return HttpResponse.json({ items, page, pageSize: 20, total });
+    }),
+    http.post("*/api/auth/login", () => {
+      current = "b";
+      return HttpResponse.json(profile(current));
+    }),
+  );
+  function Switch() {
+    const identity = useIdentity();
+    return (
+      <button
+        onClick={() => void identity.login("b@example.com", "password123")}
+      >
+        切换账号
+      </button>
+    );
+  }
+  const user = userEvent.setup();
+  render(
+    <AppProviders>
+      <Switch />
+      <TaskHistory />
+    </AppProviders>,
+  );
+  await findTaskLink("a-page-1");
+  await user.click(screen.getByRole("button", { name: "下一页" }));
+  await findTaskLink("a-page-2");
+  await user.click(screen.getByRole("button", { name: "切换账号" }));
+  await findTaskLink("b-page-1");
+  expect(taskLink("a-page-2")).toBeNull();
+  expect(screen.queryByText(/暂无制作记录/)).toBeNull();
+});
+
 test("returning to a tab after another tab changes account refreshes identity and history", async () => {
   let current = "a";
   server.use(

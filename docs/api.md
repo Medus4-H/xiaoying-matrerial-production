@@ -13,14 +13,14 @@
 
 TemplateDetail：id/title/categoryId/categoryName/description/coverUrl/requiredImageCount/acceptedMimeTypes/maxFileSizeBytes。列表目前返回同一完整 DTO，字段兼容设计的 Summary。coverUrl 为相对地址。
 
-错误：{code,message,fieldErrors:null,requestId}；不包含 stack trace、磁盘路径或数据库异常。身份响应 no-store。不存在模板 TEMPLATE_NOT_FOUND、缺身份 SESSION_REQUIRED、非法来源 ORIGIN_DENIED。框架的 404/405 保留原状态码。
+错误：{code,message,fieldErrors:null,requestId,messageKey}；不包含 stack trace、磁盘路径或数据库异常。身份响应 no-store。不存在模板 TEMPLATE_NOT_FOUND、缺身份 SESSION_REQUIRED、非法来源 ORIGIN_DENIED。框架的 404/405 保留原状态码。
 
 上传默认接受 JPEG/PNG、单张不超过 5 MiB，实际解码内容必须与声明类型一致；图片宽高和总像素也有限制。常见错误为 INVALID_ASSET（400）、ASSET_TOO_LARGE（413）、ORIGIN_DENIED（403）。文件大小和图片尺寸限制由环境配置提供。文件内容响应为 no-store，并提供 nosniff。服务端不会向客户端返回文件系统路径。任务提交会再次检查素材数量、重复项、类型、大小及归属。
 
 
 ## 账号接口
 
-所有写接口校验 Origin。`type` 为 `GUEST` 或 `ACCOUNT`，游客的 `email` 和 `phone` 为 null；所有身份响应禁缓存。注册必须携带有效访客 Cookie；默认创建独立账号并保留原浏览器访客会话，只有显式传 `importGuest: true` 才沿用原访客 ID 和记录。
+写接口在收到 Origin 时校验配置的来源白名单；无 Origin 的服务端客户端可以请求。诊断会话建立与退出是例外，要求必须提供允许的 Origin。`type` 为 `GUEST` 或 `ACCOUNT`，游客的 `email` 和 `phone` 为 null；所有身份响应禁缓存。注册必须携带有效访客 Cookie；默认创建独立账号并保留原浏览器访客会话，只有显式传 `importGuest: true` 才沿用原访客 ID 和记录。
 
 | 路由 | 请求与结果 |
 | --- | --- |
@@ -34,7 +34,7 @@ TemplateDetail：id/title/categoryId/categoryName/description/coverUrl/requiredI
 
 ## 任务接口
 
-所有接口使用当前用户 Cookie；写请求验证 Origin。任务、历史与图片仅限所属用户，不存在或无权限返回 404。提交后立即返回 HTTP 202 和任务快照，不等待制作结束；排队已满也返回 202，任务状态为 FAILED，errorCode 为 DISPATCH_REJECTED。查询只读取数据库，不驱动处理。
+所有接口使用当前用户 Cookie；写请求在携带 Origin 时验证来源。任务、历史与图片仅限所属用户，不存在或无权限返回 404。提交后立即返回 HTTP 202 和任务快照，不等待制作结束；排队已满也返回 202，任务状态为 FAILED，errorCode 为 DISPATCH_REJECTED。查询只读取数据库，不驱动处理。
 
 | 路由 | 请求与结果 |
 | --- | --- |
