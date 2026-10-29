@@ -2,8 +2,8 @@ package com.xiaoying.studio.asset;
 
 import com.xiaoying.studio.common.ApiException;
 import com.xiaoying.studio.common.ErrorKey;
-import com.xiaoying.studio.common.SafeLog;
 import com.xiaoying.studio.common.InternalErrorDetail;
+import com.xiaoying.studio.common.SafeLog;
 import com.xiaoying.studio.identity.User;
 import com.xiaoying.studio.storage.LocalFileStorage;
 import java.io.IOException;
@@ -60,14 +60,16 @@ public class AssetService {
       }
       throw e;
     }
-    SafeLog.write(() -> log.atInfo()
-        .addKeyValue("event", "asset.upload.stored")
-        .addKeyValue("assetId", id)
-        .addKeyValue("mime", asset.mimeType())
-        .addKeyValue("sizeBytes", asset.sizeBytes())
-        .addKeyValue("width", asset.width())
-        .addKeyValue("height", asset.height())
-        .log("Asset uploaded"));
+    SafeLog.write(
+        () ->
+            log.atInfo()
+                .addKeyValue("event", "asset.upload.stored")
+                .addKeyValue("assetId", id)
+                .addKeyValue("mime", asset.mimeType())
+                .addKeyValue("sizeBytes", asset.sizeBytes())
+                .addKeyValue("width", asset.width())
+                .addKeyValue("height", asset.height())
+                .log("Asset uploaded"));
     return new AssetResponse(
         id,
         "/api/assets/" + id + "/content",

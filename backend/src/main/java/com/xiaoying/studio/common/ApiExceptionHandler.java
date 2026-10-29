@@ -18,6 +18,8 @@ public class ApiExceptionHandler {
 
   @ExceptionHandler(ApiException.class)
   public ResponseEntity<ApiError> known(ApiException e, HttpServletRequest request) {
+    if (e.detail() != null)
+      request.setAttribute(RequestLogFilter.ERROR_DETAIL_ATTRIBUTE, e.detail().name());
     return response(e.status(), e.code(), e.key(), request, requestId(request));
   }
 
@@ -51,10 +53,12 @@ public class ApiExceptionHandler {
           HttpStatus.valueOf(status), "HTTP_" + status, key, request, requestId(request));
     }
     String id = requestId(request);
-    SafeLog.write(() -> log.atError()
-        .addKeyValue("event", "http.unexpected_error")
-        .addKeyValue("exceptionClass", e.getClass().getName())
-        .log("Unexpected request error"));
+    SafeLog.write(
+        () ->
+            log.atError()
+                .addKeyValue("event", "http.unexpected_error")
+                .addKeyValue("exceptionClass", e.getClass().getName())
+                .log("Unexpected request error"));
     return response(
         HttpStatus.INTERNAL_SERVER_ERROR,
         catalog.definition(ErrorKey.INTERNAL_ERROR).code(),

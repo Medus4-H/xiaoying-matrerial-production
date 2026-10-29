@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "entries": {
     "SESSION_REQUIRED": {
       "code": "SESSION_REQUIRED",
@@ -638,6 +638,36 @@
       "messages": {
         "zh-CN": "素材检查失败：素材类型或大小不符合模板要求",
         "en": "Asset validation failed: asset type or size does not meet the template requirements."
+      },
+      "args": []
+    },
+    "DIAGNOSTIC_SESSION_REQUIRED": {
+      "code": "DIAGNOSTIC_SESSION_REQUIRED",
+      "status": 401,
+      "key": "diagnostic.session_required",
+      "messages": {
+        "zh-CN": "请登录诊断会话",
+        "en": "Sign in to the diagnostic session."
+      },
+      "args": []
+    },
+    "DIAGNOSTIC_AUTH_FAILED": {
+      "code": "DIAGNOSTIC_AUTH_FAILED",
+      "status": 401,
+      "key": "diagnostic.auth_failed",
+      "messages": {
+        "zh-CN": "诊断凭据无效",
+        "en": "Invalid diagnostic credentials."
+      },
+      "args": []
+    },
+    "DIAGNOSTIC_RATE_LIMITED": {
+      "code": "DIAGNOSTIC_RATE_LIMITED",
+      "status": 429,
+      "key": "diagnostic.rate_limited",
+      "messages": {
+        "zh-CN": "诊断会话暂不可用，请稍后再试",
+        "en": "Diagnostics are temporarily unavailable. Please try again later."
       },
       "args": []
     }

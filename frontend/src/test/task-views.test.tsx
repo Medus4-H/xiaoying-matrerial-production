@@ -64,6 +64,65 @@ async function findTaskLink(id: string) {
   });
 }
 
+test("task details display only valid completed step durations", async () => {
+  const snapshot = task("duration", "FAILED");
+  snapshot.steps = [
+    {
+      stage: "ASSET_CHECK",
+      sequence: 1,
+      status: "SUCCEEDED",
+      startedAt: "2026-01-01T00:00:00Z",
+      finishedAt: "2026-01-01T00:00:01.250Z",
+      errorCode: null,
+      errorMessage: null,
+    },
+    {
+      stage: "GENERATE",
+      sequence: 2,
+      status: "FAILED",
+      startedAt: "2026-01-01T00:00:03Z",
+      finishedAt: "2026-01-01T00:00:02Z",
+      errorCode: null,
+      errorMessage: "模拟失败",
+    },
+    {
+      stage: "FINALIZE",
+      sequence: 3,
+      status: "SKIPPED",
+      startedAt: null,
+      finishedAt: null,
+      errorCode: null,
+      errorMessage: null,
+    },
+  ];
+  server.use(
+    http.get("*/api/tasks/duration", () => HttpResponse.json(snapshot)),
+  );
+  render(
+    <AppProviders>
+      <TaskDetail id="duration" />
+    </AppProviders>,
+  );
+  expect(await screen.findByText(/素材检查：完成.*耗时 1.25 秒/)).toBeTruthy();
+  expect(screen.getByText(/模拟生成：失败.*耗时不可用/)).toBeTruthy();
+  expect(screen.getByText(/结果整理：已跳过/)).toBeTruthy();
+  expect(screen.queryByText(/-1.00 秒/)).toBeNull();
+});
+
+test("task details do not invent durations for missing timestamps", async () => {
+  server.use(
+    http.get("*/api/tasks/missing-times", () =>
+      HttpResponse.json(task("missing-times", "SUCCEEDED")),
+    ),
+  );
+  render(
+    <AppProviders>
+      <TaskDetail id="missing-times" />
+    </AppProviders>,
+  );
+  expect(await screen.findByText(/模拟生成：完成.*耗时不可用/)).toBeTruthy();
+});
+
 test("history displays success, failure and an accessible result preview", async () => {
   server.use(
     http.get("*/api/tasks", () =>

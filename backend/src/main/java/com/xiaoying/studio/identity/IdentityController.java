@@ -49,10 +49,13 @@ public class IdentityController {
       throw new ApiException(ErrorKey.ORIGIN_DENIED);
     }
     var result = service.createOrReuse(token(request));
-    SafeLog.write(() -> log.atInfo()
-        .addKeyValue(
-            "event", result.created() ? "identity.session.created" : "identity.session.reused")
-        .log("Visitor session ready"));
+    SafeLog.write(
+        () ->
+            log.atInfo()
+                .addKeyValue(
+                    "event",
+                    result.created() ? "identity.session.created" : "identity.session.reused")
+                .log("Visitor session ready"));
     var cookie =
         ResponseCookie.from(config.cookieName(), result.token())
             .httpOnly(true)

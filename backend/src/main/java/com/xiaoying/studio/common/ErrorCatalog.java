@@ -60,7 +60,7 @@ public final class ErrorCatalog {
         // Do not log content from an invalid catalog.
       }
     }
-    log.warn("Primary error catalog unavailable; using the packaged fallback");
+    SafeLog.write(() -> log.warn("Primary error catalog unavailable; using the packaged fallback"));
     if (fallback == null) throw new IllegalStateException("No valid error catalog available");
     try {
       return new ErrorCatalog(mapper.readValue(fallback, Catalog.class));

@@ -1,6 +1,6 @@
 # 小影科技笔试 · 素材制作网站
 
-当前完成架构、访客、账号注册登录与身份弹窗、模板浏览和筛选、上传与任务提交页面，以及后台三阶段处理、个人历史和结果接口。数据与任务状态由 Java/MyBatis/MySQL 管理。页面已支持任务自动跟踪、个人历史和结果预览；最终完整交付验收仍待完成。
+当前完成架构、访客、账号注册登录与身份弹窗、模板浏览和筛选、上传与任务提交页面，以及后台三阶段处理、个人历史和结果接口。数据与任务状态由 Java/MyBatis/MySQL 管理。页面已支持任务自动跟踪、个人历史、结果预览和阶段耗时；容器验收及尚未验证的事项见 [阶段 D/E 记录](docs/logging-phase-de-status.md)。
 
 ## 一键启动
 
@@ -10,7 +10,7 @@
 docker compose up --build -d --wait
 ```
 
-默认访问 http://localhost:3000。无需宿主 Node/Java/MySQL、宿主绝对路径或付费资源。首次需要联网下载镜像与依赖。Flyway 自动执行 V1 表结构、V2 六模板种子、V3 封面和 V4 结果示例配置、V5 账号和会话迁移、V6 联系方式可选迁移及 V7 访客恢复表；用户由访问时创建。示例封面为 Pexels 授权照片，随 Java 镜像打包。
+默认访问 http://localhost:3000。无需宿主 Node/Java/MySQL、宿主绝对路径或付费资源。首次需要联网下载镜像与依赖。Flyway 自动执行 V1 表结构、V2 六模板种子、V3 封面和 V4 结果示例配置、V5 账号和会话迁移、V6 联系方式可选迁移、V7 访客恢复表及 V8 任务错误原因字段；用户由访问时创建。示例封面为 Pexels 授权照片，随 Java 镜像打包。
 
 ## 统一环境配置
 
@@ -19,7 +19,7 @@ docker compose up --build -d --wait
 | 变量 | 作用 |
 | --- | --- |
 | COMPOSE_PROJECT_NAME | 项目、网络和数据卷隔离，不依赖源码目录名称 |
-| FRONTEND_PORT | 主机公开端口，默认 3000 |
+| FRONTEND_PORT / FRONTEND_BIND_ADDRESS | 主机端口及绑定地址，默认 3000 / 0.0.0.0；诊断覆盖文件强制仅绑定 127.0.0.1 |
 | PUBLIC_ORIGIN | 允许的站点来源；未设置时按 FRONTEND_PORT 生成本地来源，远程/HTTPS 必须填写实际来源，无末尾斜杠；多来源逗号分隔 |
 | MYSQL_IMAGE/DATABASE/USER/PASSWORD/ROOT_PASSWORD | MySQL 版本和初始化库/凭据 |
 | AUTH_DEMO_CODE / AUTH_PASSWORD_ITERATIONS | 演示验证码（默认 123456）/ 密码 PBKDF2 迭代次数（默认 210000）；验证码仅 demo 生效 |
@@ -35,6 +35,11 @@ docker compose up --build -d --wait
 | TASK_MAX_DELAY_MS | 每个阶段允许的最大耗时，单位毫秒 |
 | TASK_CONCURRENCY / TASK_QUEUE_CAPACITY | 后台线程数和等待队列容量，默认 2 和 20 |
 | TASK_SHUTDOWN_GRACE_SECONDS / TASK_CONTAINER_STOP_GRACE | 执行器关闭等待时间和容器停止宽限期，默认 30 秒和 40 秒 |
+| LOG_CONSOLE_FORMAT / LOG_LEVEL / LOG_SLOW_REQUEST_MS | 结构化日志格式、业务日志级别及慢请求阈值 |
+| LOG_MAX_SIZE / LOG_MAX_FILES | Docker json-file 单文件大小和文件数，默认 10m / 3 |
+| METRICS_JVM_ENABLED | 是否采样 JVM 堆和 GC 指标，默认 false；线程池和排队采样始终启用 |
+| DIAGNOSTICS_ENABLED / DIAGNOSTICS_SECRET | 诊断开关与独立凭据，默认关闭；凭据不写入示例或源码 |
+| DIAGNOSTICS_CAPACITY / DIAGNOSTICS_MAX_EVENT_BYTES / DIAGNOSTICS_SESSION_TTL_SECONDS | 内存事件容量、单条字节限制、会话有效秒数；默认 500 / 2048 / 900 |
 
 Java 环境配置统一位于 application.yml；前端名称和协议路径位于 src/config/app.ts。固定协议、加密算法、枚举和容器内部端口不机械变为配置。模板内容由种子/数据库管理，不写死在前端。图片卷使用命名卷，STORAGE_ROOT 是容器路径，不是宿主路径。
 
@@ -73,7 +78,49 @@ backend：Java 21、Boot 3.5.16、MyBatis Starter 3.0.5、Flyway；MySQL 8.4.7�
 
 错误码与中英文安全文案集中在 `backend/src/main/resources/error-catalog.json`，Java 类型常量与目录在加载时校验；前端控制流常量由 `error-catalog-check` 核对。保留既有对外错误码与状态，错误响应增加 `messageKey`，前端保留 `requestId` 并优先读取 Java 的语言包。语言包不可用时回退安全响应文案；网络不可用时显示通用提示。详见 [错误码盘点与契约](docs/error-catalog-inventory.md)。
 
-错误文案默认中文，设置 `NEXT_PUBLIC_ERROR_LOCALE=en` 后重建前端镜像可使用英文错误提示；这不是全站语言切换。后端按 `Accept-Language` 支持 `zh-CN`、`en`，不支持的语言回退中文。`GET /api/i18n/errors?locale=en` 返回公开语言包。已有后台任务失败文案仍以中文保存；历史任务文案国际化、请求编号与结构化日志关联将在后续阶段完成。
+错误文案默认中文，设置 `NEXT_PUBLIC_ERROR_LOCALE=en` 后重建前端镜像可使用英文错误提示；这不是全站语言切换。后端按 `Accept-Language` 支持 `zh-CN`、`en`，不支持的语言回退中文。`GET /api/i18n/errors?locale=en` 返回公开语言包。新失败任务保存文案键并按查询语言展示；旧任务按兼容规则读取。
+
+## 日志与任务错误记录
+
+后端将结构化日志输出到容器控制台。每个后端接收的请求生成 `X-Request-Id`；错误响应中的 `requestId` 与响应头一致。任务创建日志同时包含请求编号和任务编号，可用于关联后台阶段日志。HTTP 5xx 的页面提示会显示请求编号；网络连接未建立或前端代理失败时可能没有后端编号。成功轮询默认不逐次记录，慢请求阈值由 `LOG_SLOW_REQUEST_MS` 控制。
+
+```sh
+docker compose logs --no-log-prefix --no-color backend \
+  | jq -R 'fromjson? | select(.requestId == "<请求编号>")'
+docker compose logs --no-log-prefix --no-color backend \
+  | jq -R 'fromjson? | select(.taskId == "<任务编号>")'
+```
+
+没有 `jq` 时可直接查看 `docker compose logs --no-color backend`；启动横幅等非 JSON 内容不属于结构化事件。`LOG_CONSOLE_FORMAT` 默认 `ecs`，`LOG_LEVEL` 控制应用业务事件日志级别，`LOG_MAX_SIZE` 与 `LOG_MAX_FILES` 控制后端容器的 `json-file` 日志轮转。旧日志可能因轮转或容器重建不可用，日志不是持久审计系统。关闭日志会影响编号检索。
+
+业务事件不主动记录联系方式、密码、验证码、Cookie、请求体、原始文件名或路径；日志仍包含可关联的任务和素材 ID，应限制访问。对框架中会打印非法路径的警告做了定向抑制，并保留不带原始路径的可疑请求事件。测试覆盖已知日志路径；自行调高第三方框架或 MyBatis 日志级别可能暴露参数，需要另行审查。
+
+Flyway V8 为任务及步骤增加可空的安全文案键、预留参数和内部原因；普通个人 API 不返回内部原因。新失败记录按请求语言生成安全文案，旧记录只展示已知安全历史文案，无法确认安全的内容回退为通用提示，原数据库值不被重写。当前错误文案不使用插值参数。详情见 [阶段 C 记录](docs/logging-phase-c-status.md)。
+
+## 阶段耗时与本机开发诊断
+
+任务详情使用持久化的阶段起止时间计算耗时；缺失、无效或结束早于开始时显示“耗时不可用”，等待、执行中及跳过的步骤不显示已完成耗时。后台日志中的阶段耗时和排队等待使用单调时钟；队列深度与活跃线程数是当时的线程池快照。设置 `METRICS_JVM_ENABLED=true` 可记录全 JVM 堆和 GC 累计快照：它们受其他任务及 JVM 活动影响，不能作为某个任务的资源消耗。JVM 不提供 GC 计数或耗时时，对应字段不显示。采样失败不会中断任务。
+
+诊断页面默认关闭，没有普通页面入口。开发时需要 Docker Compose 支持 `!override`，用覆盖文件将前端绑定到本机并显式启用（以下命令使用 Bash 或 Zsh）：
+
+```sh
+# 从密码管理器输入独立的随机凭据；输入不回显，不应保存到 .env 或命令历史。
+read -rs DIAGNOSTICS_SECRET
+export DIAGNOSTICS_SECRET
+docker compose -f compose.yml -f compose.diagnostics.yml up --build -d --wait
+# 访问 http://localhost:3000/dev/logs，输入相同凭据。
+```
+
+请使用至少 32 字符、由密码管理器或安全随机工具生成的独立高熵凭据；程序只能检查长度（32–256），**不能验证随机性**。不要将凭据提交到仓库或传入 URL。凭据通过容器环境变量传递，具有容器管理权限的本机用户仍可读取。覆盖文件同时启用 `demo,diagnostics` profile；任一缺失、同时启用 `prod`/`production`、凭据或容量配置无效会拒绝启动。只绑定本机不是认证机制，诊断会话仍需独立登录。启用诊断后，普通用户的登录不会授予日志权限；服务端对每次查询鉴权，建立会话和退出必须来自 `PUBLIC_ORIGIN`。诊断 Cookie 为 HttpOnly、SameSite=Strict，默认 15 分钟过期，退出或服务重启失效；内存会话最多 20 个，每分钟最多 10 次失败尝试（成功登录清空计数），重启会重置限制。需要 HTTPS 时设置 `SESSION_SECURE=true`。
+
+页面按请求编号、任务编号、级别和起始时间筛选本实例的白名单结构化事件；不展示原始日志消息、堆栈和输入。事件有容量及单条大小上限，满时淘汰最旧事件；竞争或记录失败可能丢弃新事件，重启后全部消失，**不能用作审计日志**。JVM 指标和个人业务数据一样需要限制本机及容器访问。退出诊断模式时，以正常 Compose 配置重建服务并清除当前 shell 中凭据：
+
+```sh
+docker compose up -d --force-recreate backend frontend
+unset DIAGNOSTICS_SECRET
+```
+
+上述操作会重启后端；未完成任务会按既有规则标记失败，应先等待任务结束。它保留 MySQL 和素材卷。使用不同项目名或端口时，恢复命令也须使用相同项目名和端口配置；不要执行 `down -v`。
 
 ## 验证命令
 
@@ -90,13 +137,15 @@ docker compose logs --no-color backend frontend
 docker compose down
 ```
 
-前端检查格式、lint、类型、单测和构建；Java verify 检查格式、运行单测及独立 MySQL 集成测试并打包；foundation-check、asset-check 和 task-check 对运行服务执行真实 API 检查，会创建访客、素材或任务记录，仅用于隔离演示环境，勿用于生产；task-check 需要 demo 配置。CI push/PR 配置包含这些入口，已在独立容器执行等价检查，但尚未在 GitHub 实际触发。真实连接中断和恢复的隔离演示见 [Task 8 记录](docs/task8-status.md)。
+前端检查格式、lint、类型、单测和构建；Java verify 检查格式、运行单测及独立 MySQL 集成测试并打包；foundation-check、asset-check 和 task-check 对运行服务执行真实 API 检查，会创建访客、素材或任务记录，仅用于隔离演示环境，勿用于生产；task-check 需要 demo 配置。CI push/PR 配置包含这些入口，已在独立容器执行等价检查。2026-10-29 手动触发时 GitHub 返回 `Actions has been disabled for this user`，没有生成运行记录；仓库级 Actions 已启用，账号层面的禁用原因尚未确定。排查与本地验证见 [阶段 D/E 记录](docs/logging-phase-de-status.md)。真实连接中断和恢复的隔离演示见 [Task 8 记录](docs/task8-status.md)。
 
 ## 部署、回滚与边界
 
-修改 .env → build/up → 健康与接口验证。回滚切换前一镜像，保留 MySQL/文件卷；数据库新增迁移不自动倒退，不承诺自动撤销破坏性 DDL。回滚到 V7 前的版本不会处理新的访客恢复记录；回滚到 V6 前的版本无法正确处理只有一种联系方式的新账号；回滚到 V5 前的版本会暂时失去账号登录及新会话识别能力，数据表和资料仍应保留，恢复新版本后才能重新使用账号。down 保留数据，不使用 down -v 清除现有记录。
+修改 .env → build/up → 健康与接口验证。回滚切换前一镜像，保留 MySQL/文件卷；数据库新增迁移不自动倒退，不承诺自动撤销破坏性 DDL。回滚到 V8 前的版本无法使用新的任务错误文案键和内部原因，但仍读取原错误字段；在独立测试库验证过阶段 B 镜像可启动并读取 V8 中的旧记录。回滚到 V7 前的版本不会处理新的访客恢复记录；回滚到 V6 前的版本无法正确处理只有一种联系方式的新账号；回滚到 V5 前的版本会暂时失去账号登录及新会话识别能力，数据表和资料仍应保留，恢复新版本后才能重新使用账号。down 保留数据，不使用 down -v 清除现有记录。
 
-六张结果示例复用本地模板封面；模拟生成会将预置图片复制为任务结果，并不使用真实 AI 改造上传的图片。后台任务只支持单实例；服务重启时旧的等待中或处理中任务标记为失败，不自动续跑。队列已满时仍返回 202，但该任务会记为失败；查询结果才能确定最终状态。任务创建与线程派发之间存在进程异常窗口，不提供幂等、自动重试或断点续跑。不做独立 admin、真实 AI、MQ/Redis；注册验证码仅供演示。AI 用于拆分、实现及只读审查；封面取自 Pexels，来源与许可见 [素材来源](docs/asset-sources.md)。尚无准确工时计量，不拿计划 24 小时冒充实际投入；完整交付前需补齐投入记录。
+六张结果示例复用本地模板封面；模拟生成会将预置图片复制为任务结果，并不使用真实 AI 改造上传的图片。后台任务只支持单实例；服务重启时旧的等待中或处理中任务标记为失败，不自动续跑。队列已满时仍返回 202，但该任务会记为失败；查询结果才能确定最终状态。任务创建与线程派发之间存在进程异常窗口，不提供幂等、自动重试或断点续跑。不做独立 admin、真实 AI、MQ/Redis；注册验证码仅供演示。封面取自 Pexels，来源与许可见 [素材来源](docs/asset-sources.md)。实际总投入缺少完整计时，无法可靠填写；不能把三天预算当作实际工时，交付者需按自己的记录补充。
+
+使用了 AI 编程工具：依据原题、截图、现有代码与分阶段计划拆解任务，提供相关文件作为上下文，生成或修改代码，再通过容器中的格式、类型、单元、数据库和接口检查核实。比如诊断阶段先验证权限与日志白名单，审查发现不支持的 GC 计数被当成零以及错误响应未使用统一目录，补充测试后修正并重新验证。AI 不代替最终人工确认需求、数据及交付材料。
 
 前端检查包含 Prettier 格式、lint、类型、单测与构建；Java verify 包含 Spotless 格式、单测和独立 MySQL 集成测试。前端源码可使用 `npm run format`，Java 使用 `mvn -B -s settings.xml spotless:apply`，均应在容器中执行。原计划的检查入口改用 `compose.check.yml`，其中 mysql-test 使用临时存储，不连接演示数据库。
 

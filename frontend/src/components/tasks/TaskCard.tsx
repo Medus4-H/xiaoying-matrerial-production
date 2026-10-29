@@ -24,6 +24,14 @@ const stepNames = {
   SKIPPED: "已跳过",
 };
 
+function stepDuration(step: TaskSnapshot["steps"][number]): string {
+  if (step.status !== "SUCCEEDED" && step.status !== "FAILED") return "";
+  if (!step.startedAt || !step.finishedAt) return " · 耗时不可用";
+  const duration = Date.parse(step.finishedAt) - Date.parse(step.startedAt);
+  if (!Number.isFinite(duration) || duration < 0) return " · 耗时不可用";
+  return ` · 耗时 ${(duration / 1000).toFixed(2)} 秒`;
+}
+
 export function TaskCard({
   task,
   detailed = false,
@@ -89,6 +97,7 @@ export function TaskCard({
               {current.steps.map((step) => (
                 <li key={step.stage}>
                   {stageNames[step.stage]}：{stepNames[step.status]}
+                  {stepDuration(step)}
                   {step.errorMessage ? ` · ${step.errorMessage}` : ""}
                 </li>
               ))}

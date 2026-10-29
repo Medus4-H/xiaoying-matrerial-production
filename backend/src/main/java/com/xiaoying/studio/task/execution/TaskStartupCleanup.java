@@ -25,10 +25,12 @@ public class TaskStartupCleanup implements SmartInitializingSingleton {
   public void afterSingletonsInstantiated() {
     var unfinished = mapper.unfinished();
     if (!unfinished.isEmpty())
-      SafeLog.write(() -> log.atWarn()
-          .addKeyValue("event", "task.interrupted_on_startup")
-          .addKeyValue("count", unfinished.size())
-          .log("Unfinished tasks interrupted after restart"));
+      SafeLog.write(
+          () ->
+              log.atWarn()
+                  .addKeyValue("event", "task.interrupted_on_startup")
+                  .addKeyValue("count", unfinished.size())
+                  .log("Unfinished tasks interrupted after restart"));
     for (String id : unfinished)
       state.fail(
           id,

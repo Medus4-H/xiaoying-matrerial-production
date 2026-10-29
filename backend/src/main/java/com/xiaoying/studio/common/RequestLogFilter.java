@@ -19,6 +19,8 @@ import org.springframework.web.servlet.HandlerMapping;
 @Component
 public class RequestLogFilter extends OncePerRequestFilter {
   public static final String ERROR_CODE_ATTRIBUTE = RequestLogFilter.class.getName() + ".errorCode";
+  public static final String ERROR_DETAIL_ATTRIBUTE =
+      RequestLogFilter.class.getName() + ".errorDetail";
   private final Logger log;
   private static final Set<String> METHODS =
       Set.of("GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS");
@@ -46,7 +48,11 @@ public class RequestLogFilter extends OncePerRequestFilter {
     try {
       String path = request.getRequestURI().toLowerCase(java.util.Locale.ROOT);
       if (path.contains("..") || path.contains("%2e")) {
-        SafeLog.write(() -> log.atWarn().addKeyValue("event", "request.invalid_path").log("Suspicious request path"));
+        SafeLog.write(
+            () ->
+                log.atWarn()
+                    .addKeyValue("event", "request.invalid_path")
+                    .log("Suspicious request path"));
       }
       chain.doFilter(request, response);
     } finally {
@@ -59,14 +65,18 @@ public class RequestLogFilter extends OncePerRequestFilter {
         String route = matched == null ? "unmatched" : matched.toString();
         String method = METHODS.contains(request.getMethod()) ? request.getMethod() : "OTHER";
         Object errorCode = request.getAttribute(ERROR_CODE_ATTRIBUTE);
-        SafeLog.write(() -> log.atInfo()
-            .addKeyValue("event", "http.request")
-            .addKeyValue("method", method)
-            .addKeyValue("route", route)
-            .addKeyValue("status", response.getStatus())
-            .addKeyValue("durationMs", elapsed)
-            .addKeyValue("code", errorCode == null ? "" : errorCode.toString())
-            .log("HTTP request completed"));
+        Object errorDetail = request.getAttribute(ERROR_DETAIL_ATTRIBUTE);
+        SafeLog.write(
+            () ->
+                log.atInfo()
+                    .addKeyValue("event", "http.request")
+                    .addKeyValue("method", method)
+                    .addKeyValue("route", route)
+                    .addKeyValue("status", response.getStatus())
+                    .addKeyValue("durationMs", elapsed)
+                    .addKeyValue("code", errorCode == null ? "" : errorCode.toString())
+                    .addKeyValue("detail", errorDetail == null ? "" : errorDetail.toString())
+                    .log("HTTP request completed"));
       }
       MDC.clear();
       if (previous != null) MDC.setContextMap(previous);

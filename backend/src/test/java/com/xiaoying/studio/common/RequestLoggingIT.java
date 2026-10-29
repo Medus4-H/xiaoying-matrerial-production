@@ -90,8 +90,27 @@ class RequestLoggingIT {
   void illegalPathsDoNotLeakTheirContentsInFrameworkLogs(CapturedOutput captured) throws Exception {
     mvc.perform(get("/api/assets/../../private-person@example.test/content"))
         .andExpect(status().isNotFound());
-    assertThat(captured.getAll()).contains("request.invalid_path")
+    assertThat(captured.getAll())
+        .contains("request.invalid_path")
         .doesNotContain("private-person@example.test");
+  }
+
+  @Test
+  void missingAssetHasInternalReasonOnlyInTheLog(CapturedOutput captured) throws Exception {
+    var session =
+        mvc.perform(post("/api/session"))
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getCookie("studio_session");
+    var result =
+        mvc.perform(get("/api/assets/00000000-0000-4000-8000-000000000000/content").cookie(session))
+            .andExpect(status().isNotFound())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    assertThat(result).contains("ASSET_NOT_FOUND").doesNotContain("ASSET_UNAVAILABLE_OR_NOT_OWNED");
+    assertThat(captured.getAll()).contains("ASSET_UNAVAILABLE_OR_NOT_OWNED");
   }
 
   private int occurrences(String value, String part) {

@@ -1,0 +1,10 @@
+# 仅供本机开发诊断；必须同时使用 compose.yml，并通过环境变量提供独立凭据。
+services:
+  backend:
+    environment:
+      SPRING_PROFILES_ACTIVE: demo,diagnostics
+      DIAGNOSTICS_ENABLED: 'true'
+      DIAGNOSTICS_SECRET: ${DIAGNOSTICS_SECRET:?请在环境变量中提供独立诊断凭据}
+  frontend:
+    ports: !override
+      - '127.0.0.1:${FRONTEND_PORT:-3000}:3000'

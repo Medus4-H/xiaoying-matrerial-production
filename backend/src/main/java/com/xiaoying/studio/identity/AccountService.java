@@ -145,10 +145,12 @@ public class AccountService {
     String normalized = identifier.trim().toLowerCase(Locale.ROOT);
     Account account = accounts.findByIdentifier(normalized);
     if (account == null || !passwords.matches(password, account.passwordHash())) {
-      SafeLog.write(() -> log.atInfo()
-          .addKeyValue("event", "auth.login.failed")
-          .addKeyValue("detail", account == null ? "UNKNOWN_IDENTIFIER" : "BAD_PASSWORD")
-          .log("Account login failed"));
+      SafeLog.write(
+          () ->
+              log.atInfo()
+                  .addKeyValue("event", "auth.login.failed")
+                  .addKeyValue("detail", account == null ? "UNKNOWN_IDENTIFIER" : "BAD_PASSWORD")
+                  .log("Account login failed"));
       throw new ApiException(ErrorKey.LOGIN_FAILED);
     }
     return identities.createSession(account.userId(), false);

@@ -70,7 +70,11 @@ public class AccountController {
                   input.password(),
                   input.emailCode(),
                   input.phoneCode());
-      SafeLog.write(() -> log.atInfo().addKeyValue("event", "auth.register.succeeded").log("Account registered"));
+      SafeLog.write(
+          () ->
+              log.atInfo()
+                  .addKeyValue("event", "auth.register.succeeded")
+                  .log("Account registered"));
       return ResponseEntity.ok()
           .cacheControl(CacheControl.noStore())
           .body(identityController.view(user));
@@ -84,7 +88,9 @@ public class AccountController {
       throw new ApiException(ErrorKey.GUEST_BACKUP_REGISTER);
     }
     var session = registrations.createSeparate(visitor, input);
-    SafeLog.write(() -> log.atInfo().addKeyValue("event", "auth.register.succeeded").log("Account registered"));
+    SafeLog.write(
+        () ->
+            log.atInfo().addKeyValue("event", "auth.register.succeeded").log("Account registered"));
     var response =
         ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, identityController.cookie(session).toString());
@@ -115,7 +121,9 @@ public class AccountController {
     User user =
         accounts.bind(
             requestIdentity.resolve(request), input.channel(), input.destination(), input.code());
-    SafeLog.write(() -> log.atInfo().addKeyValue("event", "auth.bind.succeeded").log("Account contact bound"));
+    SafeLog.write(
+        () ->
+            log.atInfo().addKeyValue("event", "auth.bind.succeeded").log("Account contact bound"));
     return ResponseEntity.ok()
         .cacheControl(CacheControl.noStore())
         .body(identityController.view(user));
@@ -136,7 +144,11 @@ public class AccountController {
       throw new ApiException(ErrorKey.GUEST_BACKUP_LOGIN);
     }
     var session = accounts.login(input.identifier(), input.password());
-    SafeLog.write(() -> log.atInfo().addKeyValue("event", "auth.login.succeeded").log("Account login succeeded"));
+    SafeLog.write(
+        () ->
+            log.atInfo()
+                .addKeyValue("event", "auth.login.succeeded")
+                .log("Account login succeeded"));
     var response =
         ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, identityController.cookie(session).toString());

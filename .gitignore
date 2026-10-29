@@ -8,3 +8,6 @@ target/
 .idea/
 *.log
 .workbuddy/
+
+# 本地 CI 等价运行证据（日志体积大，不入库）
+.ci-evidence/

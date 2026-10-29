@@ -1,6 +1,6 @@
 # 日志、错误码国际化与诊断改造计划
 
-日期：2026-10-29。状态：**阶段 A / B 已实现并完成容器验收；阶段 C / D / E 尚未开始**。实施及验证详情见 [阶段 A/B 记录](./logging-phase-ab-status.md)。
+日期：2026-10-29。状态：**阶段 A / B / C / D 已实现；阶段 E 的容器验收及未验证项见阶段记录**。实施及验证详情见 [阶段 A/B 记录](./logging-phase-ab-status.md)、[阶段 C 记录](./logging-phase-c-status.md) 和 [阶段 D/E 记录](./logging-phase-de-status.md)。
 
 ## 1. 目标与范围
 
@@ -17,7 +17,7 @@
 
 本题原始要求不包含完整国际化、日志后台或性能监控；这是用户提出的扩展。预计会明显增加三天笔试的工作量，工时在第 10 节单独说明。暂不建设 ELK/Loki 等外部聚合平台、生产级管理后台或全站多语言切换；错误文案国际化与全站国际化是不同范围。
 
-## 2. 当前实现与参考
+## 2. 改造前的实现与参考
 
 - 后端使用 Spring Boot、MyBatis 和 MySQL；前端为 Next.js。当前 `ApiException` 构造时同时传错误码及中文文案，业务中存在重复字符串。
 - `ApiError` 带 `code`、`message`、`fieldErrors`、`requestId`。未知 500 的 requestId 当前已经同时出现在响应和错误日志中；其他业务错误的编号没有统一贯穿日志。前端 `ApiError` 当前未保留 requestId。

@@ -115,23 +115,31 @@ public class TaskSubmissionService {
           TaskStage[] stages = TaskStage.values();
           for (int i = 0; i < stages.length; i++) mapper.insertStep(id, stages[i], i + 1);
         });
-    SafeLog.write(() -> log.atInfo()
-        .addKeyValue("event", "task.created")
-        .addKeyValue("taskId", id)
-        .log("Task record created"));
+    SafeLog.write(
+        () ->
+            log.atInfo()
+                .addKeyValue("event", "task.created")
+                .addKeyValue("taskId", id)
+                .log("Task record created"));
     try {
-      executor.execute(() -> runner.run(id));
-      SafeLog.write(() -> log.atInfo()
-          .addKeyValue("event", "task.dispatched")
-          .addKeyValue("taskId", id)
-          .addKeyValue("queueDepth", executor.getQueueSize())
-          .log("Task dispatched"));
+      long queuedAt = System.nanoTime();
+      executor.execute(() -> runner.run(id, queuedAt));
+      SafeLog.write(
+          () ->
+              log.atInfo()
+                  .addKeyValue("event", "task.dispatched")
+                  .addKeyValue("taskId", id)
+                  .addKeyValue("queueDepth", executor.getQueueSize())
+                  .addKeyValue("activeThreads", executor.getActiveCount())
+                  .log("Task dispatched"));
     } catch (java.util.concurrent.RejectedExecutionException e) {
-      SafeLog.write(() -> log.atWarn()
-          .addKeyValue("event", "task.dispatch.rejected")
-          .addKeyValue("taskId", id)
-          .addKeyValue("queueDepth", executor.getQueueSize())
-          .log("Task dispatch rejected"));
+      SafeLog.write(
+          () ->
+              log.atWarn()
+                  .addKeyValue("event", "task.dispatch.rejected")
+                  .addKeyValue("taskId", id)
+                  .addKeyValue("queueDepth", executor.getQueueSize())
+                  .log("Task dispatch rejected"));
       state.fail(
           id,
           null,

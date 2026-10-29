@@ -29,6 +29,14 @@ management:
       show-details: never
 studio:
   storage-root: ${STORAGE_ROOT:/app/data}
+  metrics:
+    jvm-enabled: ${METRICS_JVM_ENABLED:false}
+  diagnostics:
+    enabled: ${DIAGNOSTICS_ENABLED:false}
+    secret: ${DIAGNOSTICS_SECRET:}
+    capacity: ${DIAGNOSTICS_CAPACITY:500}
+    max-event-bytes: ${DIAGNOSTICS_MAX_EVENT_BYTES:2048}
+    session-ttl-seconds: ${DIAGNOSTICS_SESSION_TTL_SECONDS:900}
   assets:
     max-bytes: ${ASSET_MAX_BYTES:5242880}
     max-dimension: ${ASSET_MAX_DIMENSION:8192}
@@ -59,7 +67,16 @@ logging:
     format:
       console: ${LOG_CONSOLE_FORMAT:ecs}
   level:
-    root: ${LOG_LEVEL:INFO}
+    root: INFO
+    com.xiaoying.studio.common.RequestLogFilter: ${LOG_LEVEL:INFO}
+    com.xiaoying.studio.common.ApiExceptionHandler: ${LOG_LEVEL:INFO}
+    com.xiaoying.studio.task.TaskSubmissionService: ${LOG_LEVEL:INFO}
+    com.xiaoying.studio.task.execution.TaskRunner: ${LOG_LEVEL:INFO}
+    com.xiaoying.studio.task.execution.TaskStartupCleanup: ${LOG_LEVEL:INFO}
+    com.xiaoying.studio.asset.AssetService: ${LOG_LEVEL:INFO}
+    com.xiaoying.studio.identity.AccountController: ${LOG_LEVEL:INFO}
+    com.xiaoying.studio.identity.AccountService: ${LOG_LEVEL:INFO}
+    com.xiaoying.studio.identity.IdentityController: ${LOG_LEVEL:INFO}
     org.springframework.web.servlet.resource.ResourceHandlerUtils: ERROR
 
 mybatis:
