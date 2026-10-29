@@ -1,0 +1,645 @@
+{
+  "version": 1,
+  "entries": {
+    "SESSION_REQUIRED": {
+      "code": "SESSION_REQUIRED",
+      "status": 401,
+      "key": "auth.session_required",
+      "messages": {
+        "zh-CN": "会话已失效，请重新登录或建立访客身份",
+        "en": "Your session has expired. Please sign in or start a visitor session."
+      },
+      "args": []
+    },
+    "IDENTITY_CHANGED": {
+      "code": "IDENTITY_CHANGED",
+      "status": 409,
+      "key": "auth.identity_changed",
+      "messages": {
+        "zh-CN": "账号已切换，请重新加载个人数据",
+        "en": "Your account changed. Please reload your personal data."
+      },
+      "args": []
+    },
+    "ORIGIN_DENIED": {
+      "code": "ORIGIN_DENIED",
+      "status": 403,
+      "key": "auth.origin_denied",
+      "messages": {
+        "zh-CN": "不允许的请求来源",
+        "en": "This request origin is not allowed."
+      },
+      "args": []
+    },
+    "LOGIN_FAILED": {
+      "code": "LOGIN_FAILED",
+      "status": 401,
+      "key": "auth.login_failed",
+      "messages": {
+        "zh-CN": "账号或密码不正确",
+        "en": "Incorrect account or password"
+      },
+      "args": []
+    },
+    "ACCOUNT_REQUIRED": {
+      "code": "ACCOUNT_REQUIRED",
+      "status": 401,
+      "key": "auth.account_required",
+      "messages": {
+        "zh-CN": "请先登录账号",
+        "en": "Please sign in first."
+      },
+      "args": []
+    },
+    "ALREADY_REGISTERED": {
+      "code": "ALREADY_REGISTERED",
+      "status": 409,
+      "key": "auth.already_registered",
+      "messages": {
+        "zh-CN": "当前身份已经注册，请先退出账号",
+        "en": "This identity is already registered. Please sign out first."
+      },
+      "args": []
+    },
+    "ACCOUNT_EXISTS": {
+      "code": "ACCOUNT_EXISTS",
+      "status": 409,
+      "key": "auth.account_exists",
+      "messages": {
+        "zh-CN": "邮箱或手机号已注册",
+        "en": "This email address or phone number is already registered."
+      },
+      "args": []
+    },
+    "CONTACT_TAKEN": {
+      "code": "ACCOUNT_EXISTS",
+      "status": 409,
+      "key": "auth.contact_taken",
+      "messages": {
+        "zh-CN": "该邮箱或手机号已被其他账号使用",
+        "en": "This contact is already used by another account."
+      },
+      "args": []
+    },
+    "CONTACT_ALREADY_BOUND": {
+      "code": "CONTACT_ALREADY_BOUND",
+      "status": 409,
+      "key": "auth.contact_already_bound",
+      "messages": {
+        "zh-CN": "该类型的联系方式已经绑定",
+        "en": "This type of contact is already bound."
+      },
+      "args": []
+    },
+    "VISITOR_RECOVERY_INVALID": {
+      "code": "VISITOR_RECOVERY_INVALID",
+      "status": 409,
+      "key": "auth.visitor_recovery_invalid",
+      "messages": {
+        "zh-CN": "访客记录暂时无法恢复",
+        "en": "Visitor records cannot be restored right now."
+      },
+      "args": []
+    },
+    "GUEST_BACKUP_REGISTER": {
+      "code": "GUEST_BACKUP_EXISTS",
+      "status": 409,
+      "key": "auth.guest_backup_register",
+      "messages": {
+        "zh-CN": "当前浏览器已有待恢复的访客记录，请先退出并保存，再注册当前访客",
+        "en": "This browser has visitor records to restore. Save them before registering."
+      },
+      "args": []
+    },
+    "GUEST_BACKUP_LOGIN": {
+      "code": "GUEST_BACKUP_EXISTS",
+      "status": 409,
+      "key": "auth.guest_backup_login",
+      "messages": {
+        "zh-CN": "当前浏览器已有待恢复的访客记录，请先保存当前访客资料",
+        "en": "This browser has visitor records to restore. Save the current visitor data first."
+      },
+      "args": []
+    },
+    "GUEST_LOGOUT": {
+      "code": "GUEST_LOGOUT",
+      "status": 409,
+      "key": "auth.guest_logout",
+      "messages": {
+        "zh-CN": "访客身份请先注册保存资料",
+        "en": "Please register to save visitor data first."
+      },
+      "args": []
+    },
+    "DEMO_DISABLED": {
+      "code": "DEMO_DISABLED",
+      "status": 403,
+      "key": "auth.demo_disabled",
+      "messages": {
+        "zh-CN": "演示注册未启用",
+        "en": "Demo registration is disabled."
+      },
+      "args": []
+    },
+    "ACCOUNT_CHANNEL": {
+      "code": "INVALID_ACCOUNT_INPUT",
+      "status": 400,
+      "key": "auth.channel_required",
+      "messages": {
+        "zh-CN": "请选择邮箱或手机号",
+        "en": "Please choose email or phone."
+      },
+      "args": []
+    },
+    "ACCOUNT_REGISTER_CHANNEL": {
+      "code": "INVALID_ACCOUNT_INPUT",
+      "status": 400,
+      "key": "auth.register_channel",
+      "messages": {
+        "zh-CN": "请选择一种注册方式",
+        "en": "Please choose one registration method."
+      },
+      "args": []
+    },
+    "ACCOUNT_CODE": {
+      "code": "INVALID_ACCOUNT_INPUT",
+      "status": 400,
+      "key": "auth.code_invalid",
+      "messages": {
+        "zh-CN": "验证码不正确，请使用演示验证码",
+        "en": "The verification code is incorrect. Use the demo code."
+      },
+      "args": []
+    },
+    "ACCOUNT_LOGIN_INPUT": {
+      "code": "INVALID_ACCOUNT_INPUT",
+      "status": 400,
+      "key": "auth.login_input",
+      "messages": {
+        "zh-CN": "请输入有效的账号和密码",
+        "en": "Please enter a valid account and password."
+      },
+      "args": []
+    },
+    "ACCOUNT_EMAIL": {
+      "code": "INVALID_ACCOUNT_INPUT",
+      "status": 400,
+      "key": "auth.email_invalid",
+      "messages": {
+        "zh-CN": "请输入有效邮箱",
+        "en": "Please enter a valid email address."
+      },
+      "args": []
+    },
+    "ACCOUNT_PHONE": {
+      "code": "INVALID_ACCOUNT_INPUT",
+      "status": 400,
+      "key": "auth.phone_invalid",
+      "messages": {
+        "zh-CN": "请输入有效手机号",
+        "en": "Please enter a valid phone number."
+      },
+      "args": []
+    },
+    "ACCOUNT_PHONE_FORMAT": {
+      "code": "INVALID_ACCOUNT_INPUT",
+      "status": 400,
+      "key": "auth.phone_format",
+      "messages": {
+        "zh-CN": "手机号应为 6 至 15 位数字，可包含国际区号",
+        "en": "The phone number must have 6 to 15 digits, optionally with a country prefix."
+      },
+      "args": []
+    },
+    "ACCOUNT_PASSWORD": {
+      "code": "INVALID_ACCOUNT_INPUT",
+      "status": 400,
+      "key": "auth.password_length",
+      "messages": {
+        "zh-CN": "密码长度应为 8 至 128 个字符",
+        "en": "The password must contain 8 to 128 characters."
+      },
+      "args": []
+    },
+    "TEMPLATE_NOT_FOUND": {
+      "code": "TEMPLATE_NOT_FOUND",
+      "status": 404,
+      "key": "template.not_found",
+      "messages": {
+        "zh-CN": "模板不存在",
+        "en": "Template not found."
+      },
+      "args": []
+    },
+    "COVER_NOT_FOUND": {
+      "code": "COVER_NOT_FOUND",
+      "status": 404,
+      "key": "template.cover_not_found",
+      "messages": {
+        "zh-CN": "模板封面不可用",
+        "en": "The template cover is unavailable."
+      },
+      "args": []
+    },
+    "INVALID_TEMPLATE": {
+      "code": "INVALID_TEMPLATE",
+      "status": 400,
+      "key": "template.result_unavailable",
+      "messages": {
+        "zh-CN": "模板结果素材不可用",
+        "en": "The template result asset is unavailable."
+      },
+      "args": []
+    },
+    "ASSET_TOO_LARGE": {
+      "code": "ASSET_TOO_LARGE",
+      "status": 413,
+      "key": "asset.too_large",
+      "messages": {
+        "zh-CN": "图片超过大小限制",
+        "en": "The image exceeds the size limit."
+      },
+      "args": []
+    },
+    "ASSET_REQUEST_TOO_LARGE": {
+      "code": "ASSET_TOO_LARGE",
+      "status": 413,
+      "key": "asset.request_too_large",
+      "messages": {
+        "zh-CN": "上传文件超过大小限制",
+        "en": "The uploaded file exceeds the size limit."
+      },
+      "args": []
+    },
+    "ASSET_EMPTY": {
+      "code": "INVALID_ASSET",
+      "status": 400,
+      "key": "asset.empty",
+      "messages": {
+        "zh-CN": "请选择图片",
+        "en": "Please select an image."
+      },
+      "args": []
+    },
+    "ASSET_TYPE": {
+      "code": "INVALID_ASSET",
+      "status": 400,
+      "key": "asset.type",
+      "messages": {
+        "zh-CN": "仅支持 JPEG 或 PNG 图片",
+        "en": "Only JPEG and PNG images are supported."
+      },
+      "args": []
+    },
+    "ASSET_SIZE_INVALID": {
+      "code": "INVALID_ASSET",
+      "status": 400,
+      "key": "asset.size_invalid",
+      "messages": {
+        "zh-CN": "图片大小无效",
+        "en": "The image size is invalid."
+      },
+      "args": []
+    },
+    "ASSET_UNREADABLE": {
+      "code": "INVALID_ASSET",
+      "status": 400,
+      "key": "asset.unreadable",
+      "messages": {
+        "zh-CN": "图片无法读取",
+        "en": "The image cannot be read."
+      },
+      "args": []
+    },
+    "ASSET_CONTENT": {
+      "code": "INVALID_ASSET",
+      "status": 400,
+      "key": "asset.content_invalid",
+      "messages": {
+        "zh-CN": "图片内容无效",
+        "en": "The image content is invalid."
+      },
+      "args": []
+    },
+    "ASSET_MIME_MISMATCH": {
+      "code": "INVALID_ASSET",
+      "status": 400,
+      "key": "asset.type_mismatch",
+      "messages": {
+        "zh-CN": "图片类型与内容不一致",
+        "en": "The image type does not match its contents."
+      },
+      "args": []
+    },
+    "ASSET_DIMENSIONS": {
+      "code": "INVALID_ASSET",
+      "status": 400,
+      "key": "asset.dimensions",
+      "messages": {
+        "zh-CN": "图片尺寸超过限制",
+        "en": "The image dimensions exceed the limit."
+      },
+      "args": []
+    },
+    "ASSET_DECODE": {
+      "code": "INVALID_ASSET",
+      "status": 400,
+      "key": "asset.decode",
+      "messages": {
+        "zh-CN": "图片无法解码",
+        "en": "The image cannot be decoded."
+      },
+      "args": []
+    },
+    "ASSET_CORRUPT": {
+      "code": "INVALID_ASSET",
+      "status": 400,
+      "key": "asset.corrupt",
+      "messages": {
+        "zh-CN": "图片内容损坏或无法解码",
+        "en": "The image is corrupt or cannot be decoded."
+      },
+      "args": []
+    },
+    "ASSET_REQUIREMENTS": {
+      "code": "INVALID_ASSET",
+      "status": 400,
+      "key": "asset.requirements",
+      "messages": {
+        "zh-CN": "素材类型或大小不符合模板要求",
+        "en": "The asset type or size does not meet the template requirements."
+      },
+      "args": []
+    },
+    "ASSET_COUNT": {
+      "code": "INVALID_ASSET_COUNT",
+      "status": 400,
+      "key": "asset.count",
+      "messages": {
+        "zh-CN": "素材数量或选择不符合模板要求",
+        "en": "The selected assets do not meet the template requirements."
+      },
+      "args": []
+    },
+    "ASSET_NOT_FOUND": {
+      "code": "ASSET_NOT_FOUND",
+      "status": 404,
+      "key": "asset.not_found",
+      "messages": {
+        "zh-CN": "素材不存在",
+        "en": "Asset not found."
+      },
+      "args": []
+    },
+    "TASK_NOT_FOUND": {
+      "code": "TASK_NOT_FOUND",
+      "status": 404,
+      "key": "task.not_found",
+      "messages": {
+        "zh-CN": "任务不存在",
+        "en": "Task not found."
+      },
+      "args": []
+    },
+    "INVALID_PAGE": {
+      "code": "INVALID_PAGE",
+      "status": 400,
+      "key": "task.invalid_page",
+      "messages": {
+        "zh-CN": "分页参数无效",
+        "en": "Invalid pagination parameters."
+      },
+      "args": []
+    },
+    "INVALID_TASK": {
+      "code": "INVALID_TASK",
+      "status": 400,
+      "key": "task.invalid",
+      "messages": {
+        "zh-CN": "请选择模板和所需素材",
+        "en": "Please select a template and the required assets."
+      },
+      "args": []
+    },
+    "SIMULATION_DISABLED": {
+      "code": "SIMULATION_DISABLED",
+      "status": 400,
+      "key": "task.simulation_disabled",
+      "messages": {
+        "zh-CN": "当前环境不允许修改模拟参数",
+        "en": "Simulation parameters cannot be changed in this environment."
+      },
+      "args": []
+    },
+    "INVALID_SIMULATION": {
+      "code": "INVALID_SIMULATION",
+      "status": 400,
+      "key": "task.invalid_simulation",
+      "messages": {
+        "zh-CN": "阶段耗时超出允许范围",
+        "en": "The stage delay is outside the allowed range."
+      },
+      "args": []
+    },
+    "RESULT_NOT_FOUND": {
+      "code": "RESULT_NOT_FOUND",
+      "status": 404,
+      "key": "task.result_not_found",
+      "messages": {
+        "zh-CN": "结果不存在",
+        "en": "Result not found."
+      },
+      "args": []
+    },
+    "RESULT_FILE_MISSING": {
+      "code": "RESULT_NOT_FOUND",
+      "status": 404,
+      "key": "task.result_file_missing",
+      "messages": {
+        "zh-CN": "结果文件不可用",
+        "en": "The result file is unavailable."
+      },
+      "args": []
+    },
+    "INVALID_REQUEST": {
+      "code": "INVALID_REQUEST",
+      "status": 400,
+      "key": "common.invalid_request",
+      "messages": {
+        "zh-CN": "请求格式或参数无效",
+        "en": "The request format or parameters are invalid."
+      },
+      "args": []
+    },
+    "HTTP_NOT_FOUND": {
+      "code": "HTTP_404",
+      "status": 404,
+      "key": "common.route_not_found",
+      "messages": {
+        "zh-CN": "接口不存在",
+        "en": "The endpoint does not exist."
+      },
+      "args": []
+    },
+    "HTTP_METHOD_NOT_ALLOWED": {
+      "code": "HTTP_405",
+      "status": 405,
+      "key": "common.method_not_allowed",
+      "messages": {
+        "zh-CN": "不支持的请求方法",
+        "en": "The request method is not supported."
+      },
+      "args": []
+    },
+    "HTTP_ERROR": {
+      "code": "HTTP_400",
+      "status": 400,
+      "key": "common.http_error",
+      "messages": {
+        "zh-CN": "请求参数或格式不正确",
+        "en": "The request parameters or format are invalid."
+      },
+      "args": []
+    },
+    "INTERNAL_ERROR": {
+      "code": "INTERNAL_ERROR",
+      "status": 500,
+      "key": "common.internal_error",
+      "messages": {
+        "zh-CN": "服务暂时不可用，请稍后重试",
+        "en": "The service is temporarily unavailable. Please try again later."
+      },
+      "args": []
+    },
+    "DISPATCH_REJECTED": {
+      "code": "DISPATCH_REJECTED",
+      "status": 503,
+      "key": "task.dispatch_rejected",
+      "messages": {
+        "zh-CN": "任务较多，请稍后重新提交",
+        "en": "Too many tasks. Please submit again later."
+      },
+      "args": []
+    },
+    "SERVER_RESTARTED": {
+      "code": "SERVER_RESTARTED",
+      "status": 500,
+      "key": "task.server_restarted",
+      "messages": {
+        "zh-CN": "服务重启，任务已中断",
+        "en": "The task was interrupted by a server restart."
+      },
+      "args": []
+    },
+    "EXECUTION_ERROR": {
+      "code": "EXECUTION_ERROR",
+      "status": 500,
+      "key": "task.execution_error",
+      "messages": {
+        "zh-CN": "后台处理被中断或发生错误",
+        "en": "Background processing was interrupted or failed."
+      },
+      "args": []
+    },
+    "TASK_MISSING": {
+      "code": "TASK_MISSING",
+      "status": 500,
+      "key": "task.record_missing",
+      "messages": {
+        "zh-CN": "任务记录不存在",
+        "en": "The task record does not exist."
+      },
+      "args": []
+    },
+    "RESULT_SOURCE_UNAVAILABLE": {
+      "code": "RESULT_SOURCE_UNAVAILABLE",
+      "status": 500,
+      "key": "task.result_source_unavailable",
+      "messages": {
+        "zh-CN": "模拟结果素材不可用，请联系管理员",
+        "en": "The simulated result asset is unavailable."
+      },
+      "args": []
+    },
+    "ASSET_CHECK_FAILED": {
+      "code": "ASSET_CHECK_FAILED",
+      "status": 400,
+      "key": "task.asset_check_failed",
+      "messages": {
+        "zh-CN": "素材检查失败",
+        "en": "Asset validation failed."
+      },
+      "args": []
+    },
+    "SIMULATED_ASSET_CHECK": {
+      "code": "SIMULATED_FAILURE",
+      "status": 500,
+      "key": "task.simulated_asset_check",
+      "messages": {
+        "zh-CN": "模拟失败：素材检查",
+        "en": "Simulated failure: asset validation."
+      },
+      "args": []
+    },
+    "SIMULATED_GENERATE": {
+      "code": "SIMULATED_FAILURE",
+      "status": 500,
+      "key": "task.simulated_generate",
+      "messages": {
+        "zh-CN": "模拟失败：模拟生成",
+        "en": "Simulated failure: generation."
+      },
+      "args": []
+    },
+    "SIMULATED_FINALIZE": {
+      "code": "SIMULATED_FAILURE",
+      "status": 500,
+      "key": "task.simulated_finalize",
+      "messages": {
+        "zh-CN": "模拟失败：结果整理",
+        "en": "Simulated failure: result preparation."
+      },
+      "args": []
+    },
+    "REQUEST_FAILED": {
+      "code": "REQUEST_FAILED",
+      "status": 503,
+      "key": "common.request_failed",
+      "messages": {
+        "zh-CN": "请求失败，请稍后重试",
+        "en": "Request failed. Please try again later."
+      },
+      "args": []
+    },
+    "ASSET_CHECK_MISSING": {
+      "code": "ASSET_CHECK_FAILED",
+      "status": 400,
+      "key": "task.asset_check_missing",
+      "messages": {
+        "zh-CN": "素材检查失败：素材不存在",
+        "en": "Asset validation failed: asset not found."
+      },
+      "args": []
+    },
+    "ASSET_CHECK_COUNT": {
+      "code": "ASSET_CHECK_FAILED",
+      "status": 400,
+      "key": "task.asset_check_count",
+      "messages": {
+        "zh-CN": "素材检查失败：素材数量或选择不符合模板要求",
+        "en": "Asset validation failed: the selected assets do not meet the template requirements."
+      },
+      "args": []
+    },
+    "ASSET_CHECK_REQUIREMENTS": {
+      "code": "ASSET_CHECK_FAILED",
+      "status": 400,
+      "key": "task.asset_check_requirements",
+      "messages": {
+        "zh-CN": "素材检查失败：素材类型或大小不符合模板要求",
+        "en": "Asset validation failed: asset type or size does not meet the template requirements."
+      },
+      "args": []
+    }
+  }
+}

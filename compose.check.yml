@@ -1,0 +1,41 @@
+name: xiaoying-studio-check
+services:
+  frontend-check:
+    build:
+      context: ./frontend
+      target: check
+  error-catalog-check:
+    image: node:22.14.0-bookworm-slim
+    volumes:
+      - .:/project:ro
+    command: [node, /project/checks/error-catalog.mjs]
+  mysql-test:
+    image: mysql:8.4.7
+    environment:
+      MYSQL_DATABASE: studio_test
+      MYSQL_USER: studio_test
+      MYSQL_PASSWORD: test-only
+      MYSQL_ROOT_PASSWORD: test-only-root
+      TZ: UTC
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: [CMD-SHELL, 'mysqladmin ping -h 127.0.0.1 -uroot -p"$$MYSQL_ROOT_PASSWORD" --silent']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  backend-check:
+    build:
+      context: ./backend
+      target: check
+    environment:
+      DB_URL: jdbc:mysql://mysql-test:3306/studio_test?connectionTimeZone=UTC
+      DB_USER: studio_test
+      DB_PASSWORD: test-only
+    volumes:
+      - maven-test-cache:/root/.m2
+    depends_on:
+      mysql-test:
+        condition: service_healthy
+volumes:
+  maven-test-cache:

@@ -1,0 +1,27 @@
+# Only used with compose.yml and a dedicated project for browser fault validation.
+services:
+  task-fault-proxy:
+    image: node:22.14.0-bookworm-slim
+    command: [node, /checks/task8-proxy.mjs]
+    volumes:
+      - ./checks:/checks:ro
+    environment:
+      UPSTREAM_URL: http://backend:8080
+      PORT: 8081
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:8081/__health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  frontend:
+    build:
+      args:
+        BACKEND_INTERNAL_URL: http://task-fault-proxy:8081
+    environment:
+      BACKEND_INTERNAL_URL: http://task-fault-proxy:8081
+    depends_on:
+      task-fault-proxy:
+        condition: service_healthy

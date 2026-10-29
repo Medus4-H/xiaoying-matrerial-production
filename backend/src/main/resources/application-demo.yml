@@ -1,0 +1,4 @@
+studio:
+  simulation-enabled: true
+  auth:
+    demo-enabled: true

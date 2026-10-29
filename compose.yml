@@ -1,0 +1,128 @@
+name: ${COMPOSE_PROJECT_NAME:-xiaoying-studio}
+services:
+  mysql:
+    image: ${MYSQL_IMAGE:-mysql:8.4.7}
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-studio}
+      MYSQL_USER: ${MYSQL_USER:-studio}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-local-demo-only}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-local-root-only}
+      TZ: UTC
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [CMD-SHELL, 'mysqladmin ping -h 127.0.0.1 -uroot -p"$$MYSQL_ROOT_PASSWORD" --silent']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  backend:
+    build:
+      context: ./backend
+    stop_grace_period: ${TASK_CONTAINER_STOP_GRACE:-40s}
+    environment:
+      SPRING_PROFILES_ACTIVE: ${APP_PROFILE:-demo}
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-studio}?connectionTimeZone=UTC
+      DB_USER: ${MYSQL_USER:-studio}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-local-demo-only}
+      STORAGE_ROOT: /app/data
+      LOG_CONSOLE_FORMAT: ${LOG_CONSOLE_FORMAT:-ecs}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      STUDIO_LOGGING_SLOW_REQUEST_MS: ${LOG_SLOW_REQUEST_MS:-500}
+      AUTH_DEMO_CODE: ${AUTH_DEMO_CODE:-123456}
+      AUTH_PASSWORD_ITERATIONS: ${AUTH_PASSWORD_ITERATIONS:-210000}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-studio_session}
+      SESSION_TTL: ${SESSION_TTL:-7d}
+      SESSION_SECURE: ${SESSION_SECURE:-false}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:${FRONTEND_PORT:-3000}}
+      TEMPLATE_MEDIA_ROOT: classpath:/demo/
+      TASK_ASSET_CHECK_DELAY_MS: ${TASK_ASSET_CHECK_DELAY_MS:-1000}
+      TASK_GENERATE_DELAY_MS: ${TASK_GENERATE_DELAY_MS:-6000}
+      TASK_FINALIZE_DELAY_MS: ${TASK_FINALIZE_DELAY_MS:-1000}
+      TASK_MAX_DELAY_MS: ${TASK_MAX_DELAY_MS:-30000}
+      TASK_CONCURRENCY: ${TASK_CONCURRENCY:-2}
+      TASK_QUEUE_CAPACITY: ${TASK_QUEUE_CAPACITY:-20}
+      TASK_SHUTDOWN_GRACE_SECONDS: ${TASK_SHUTDOWN_GRACE_SECONDS:-30}
+      ASSET_MAX_BYTES: ${ASSET_MAX_BYTES:-5242880}
+      ASSET_MAX_DIMENSION: ${ASSET_MAX_DIMENSION:-8192}
+      ASSET_MAX_PIXELS: ${ASSET_MAX_PIXELS:-16000000}
+      ASSET_MULTIPART_FILE_LIMIT: ${ASSET_MULTIPART_FILE_LIMIT:-5MB}
+      ASSET_MULTIPART_REQUEST_LIMIT: ${ASSET_MULTIPART_REQUEST_LIMIT:-6MB}
+    volumes:
+      - asset-data:/app/data
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, curl, -fsS, http://localhost:8080/api/system/health]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8080}
+        NEXT_PUBLIC_SHOW_SIMULATION_CONTROLS: ${NEXT_PUBLIC_SHOW_SIMULATION_CONTROLS:-false}
+        NEXT_PUBLIC_ERROR_LOCALE: ${NEXT_PUBLIC_ERROR_LOCALE:-zh-CN}
+        NEXT_PUBLIC_TASK_POLL_INTERVAL_MS: ${NEXT_PUBLIC_TASK_POLL_INTERVAL_MS:-2000}
+        NEXT_PUBLIC_TASK_HISTORY_PAGE_SIZE: ${NEXT_PUBLIC_TASK_HISTORY_PAGE_SIZE:-20}
+        NEXT_PUBLIC_TASK_QUERY_TIMEOUT_MS: ${NEXT_PUBLIC_TASK_QUERY_TIMEOUT_MS:-10000}
+    ports:
+      - '${FRONTEND_PORT:-3000}:3000'
+    environment:
+      BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8080}
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  foundation-check:
+    profiles: [tools]
+    image: node:22.14.0-bookworm-slim
+    working_dir: /checks
+    volumes:
+      - ./checks:/checks:ro
+    environment:
+      BASE_URL: http://frontend:3000
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:${FRONTEND_PORT:-3000}}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-studio_session}
+    command: [node, foundation.mjs]
+    depends_on:
+      frontend:
+        condition: service_healthy
+  asset-check:
+    profiles: [tools]
+    image: node:22.14.0-bookworm-slim
+    working_dir: /checks
+    volumes:
+      - ./checks:/checks:ro
+      - ./demo-assets/uploads:/fixtures:ro
+    environment:
+      BASE_URL: http://frontend:3000
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:${FRONTEND_PORT:-3000}}
+      ASSET_MAX_BYTES: ${ASSET_MAX_BYTES:-5242880}
+    command: [node, assets.mjs]
+    depends_on:
+      frontend:
+        condition: service_healthy
+  task-check:
+    profiles: [tools]
+    image: node:22.14.0-bookworm-slim
+    working_dir: /checks
+    volumes:
+      - ./checks:/checks:ro
+      - ./demo-assets/uploads:/fixtures:ro
+    environment:
+      BASE_URL: http://frontend:3000
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:${FRONTEND_PORT:-3000}}
+    command: [node, tasks.mjs]
+    depends_on:
+      frontend:
+        condition: service_healthy
+volumes:
+  mysql-data:
+  asset-data:

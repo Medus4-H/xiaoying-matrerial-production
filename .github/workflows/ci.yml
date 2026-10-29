@@ -1,0 +1,36 @@
+name: Build and test
+on: [push, pull_request]
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Frontend lint, types, tests and build
+        run: docker compose -f compose.check.yml run --build --rm frontend-check
+      - name: Check shared error codes
+        run: docker compose -f compose.check.yml run --rm error-catalog-check
+      - name: Java tests and build
+        run: docker compose -f compose.check.yml run --build --rm backend-check
+      - name: Start application stack
+        run: docker compose up --build -d --wait --wait-timeout 300
+      - name: Verify same-origin Java health
+        run: curl --fail --retry 5 --retry-delay 2 http://localhost:3000/api/system/health
+      - name: Foundation API checks
+        run: docker compose --profile tools run --rm foundation-check
+      - name: Asset upload and access checks
+        run: docker compose --profile tools run --rm asset-check
+      - name: Task pipeline checks
+        run: docker compose --profile tools run --rm task-check
+      - name: Application logs
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Check environment logs
+        if: failure()
+        run: docker compose -f compose.check.yml logs --no-color
+      - name: Stop application services without deleting volumes
+        if: always()
+        run: docker compose down
+      - name: Stop check services without deleting volumes
+        if: always()
+        run: docker compose -f compose.check.yml down

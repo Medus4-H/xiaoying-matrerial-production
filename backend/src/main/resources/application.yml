@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: xiaoying-studio
+  datasource:
+    url: ${DB_URL:jdbc:mysql://mysql:3306/studio?connectionTimeZone=UTC}
+    username: ${DB_USER:studio}
+    password: ${DB_PASSWORD:local-demo-only}
+  flyway:
+    enabled: true
+  jackson:
+    time-zone: UTC
+    deserialization:
+      fail-on-unknown-properties: true
+  servlet:
+    multipart:
+      max-file-size: ${ASSET_MULTIPART_FILE_LIMIT:5MB}
+      max-request-size: ${ASSET_MULTIPART_REQUEST_LIMIT:6MB}
+server:
+  port: 8080
+  shutdown: graceful
+management:
+  endpoints:
+    web:
+      base-path: /api/system
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+studio:
+  storage-root: ${STORAGE_ROOT:/app/data}
+  assets:
+    max-bytes: ${ASSET_MAX_BYTES:5242880}
+    max-dimension: ${ASSET_MAX_DIMENSION:8192}
+    max-pixels: ${ASSET_MAX_PIXELS:16000000}
+  task:
+    asset-check-delay-ms: ${TASK_ASSET_CHECK_DELAY_MS:1000}
+    generate-delay-ms: ${TASK_GENERATE_DELAY_MS:6000}
+    finalize-delay-ms: ${TASK_FINALIZE_DELAY_MS:1000}
+    max-delay-ms: ${TASK_MAX_DELAY_MS:30000}
+    concurrency: ${TASK_CONCURRENCY:2}
+    queue-capacity: ${TASK_QUEUE_CAPACITY:20}
+    shutdown-grace-seconds: ${TASK_SHUTDOWN_GRACE_SECONDS:30}
+  simulation-enabled: false
+  auth:
+    demo-enabled: false
+    demo-code: ${AUTH_DEMO_CODE:123456}
+    password-iterations: ${AUTH_PASSWORD_ITERATIONS:210000}
+  session:
+    cookie-name: ${SESSION_COOKIE_NAME:studio_session}
+    ttl: ${SESSION_TTL:7d}
+    secure: ${SESSION_SECURE:false}
+    allowed-origins: ${PUBLIC_ORIGIN:http://localhost:3000}
+  media:
+    root: ${TEMPLATE_MEDIA_ROOT:classpath:/demo/}
+
+logging:
+  structured:
+    format:
+      console: ${LOG_CONSOLE_FORMAT:ecs}
+  level:
+    root: ${LOG_LEVEL:INFO}
+    org.springframework.web.servlet.resource.ResourceHandlerUtils: ERROR
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
