@@ -55,7 +55,7 @@ backend：Java 21、Boot 3.5.16、MyBatis Starter 3.0.5、Flyway；MySQL 8.4.7�
 - frontend/src：页面、访客入口、模板组件、API 客户端。
 - backend/src：按 identity/template/asset/task/storage/common/config 分包。
 - backend/src/main/resources/demo/covers：真实照片封面（JPEG，1000×1250），不是上传素材；上传阶段仍只接受 JPEG/PNG。
-- checks/foundation.mjs、checks/assets.mjs、checks/tasks.mjs：容器接口合同检查。
+- checks/foundation.mjs、checks/assets.mjs、checks/tasks.mjs：容器接口合同检查；checks/persistence.mjs：独立环境重建前后的数据持久化检查。
 - docs：[设计](docs/2026-10-28-design.md)、[计划](docs/2026-10-28-development-plan.md)、[基础阶段记录](docs/foundation-status.md)、[Task 4 记录](docs/task4-status.md)、[Task 5 记录](docs/task5-status.md)、[Task 6 记录](docs/task6-status.md)、[Task 7 记录](docs/task7-status.md)、[Task 8 记录](docs/task8-status.md)、[账号身份更新](docs/account-identity-status.md)、[注册与绑定设计](docs/account-contact-design.md)、[账号隔离修复记录](docs/account-isolation-status.md)、[验收清单](docs/acceptance.md)、[接口](docs/api.md)。
 
 ## 身份
@@ -154,6 +154,21 @@ docker compose down
 ```
 
 前端检查格式、lint、类型、单测和构建；Java verify 检查格式、运行单测及独立 MySQL 集成测试并打包；foundation-check、asset-check 和 task-check 对运行服务执行真实 API 检查，会创建访客、素材或任务记录，仅用于隔离演示环境，勿用于生产；task-check 需要 demo 配置。CI push/PR 配置包含这些入口，已在独立容器执行等价检查。2026-10-29 手动触发时 GitHub 返回 `Actions has been disabled for this user`，没有生成运行记录；仓库级 Actions 已启用，账号层面的禁用原因尚未确定。排查与本地验证见 [阶段 D/E 记录](docs/logging-phase-de-status.md)。真实连接中断和恢复的隔离演示见 [Task 8 记录](docs/task8-status.md)。
+
+## 复验容器重建后的数据
+
+下面的检查会创建测试访客、上传项目示例、提交一个成功任务，并重建所选 Compose 项目的容器。**仅针对独立演示项目执行**；重建会中断该项目尚未完成的任务。先按上文启动 `xiaoying-demo`，再运行：
+
+```sh
+docker volume create xiaoying-demo-proof
+FRONTEND_PORT=3109 docker compose -p xiaoying-demo --profile tools run --rm --no-deps \
+  -v xiaoying-demo-proof:/proof asset-check node /checks/persistence.mjs prepare
+FRONTEND_PORT=3109 docker compose -p xiaoying-demo up -d --force-recreate --wait
+FRONTEND_PORT=3109 docker compose -p xiaoying-demo --profile tools run --rm --no-deps \
+  -v xiaoying-demo-proof:/proof asset-check node /checks/persistence.mjs verify
+```
+
+检查对比重建前后图片的 SHA-256、会话、任务状态及历史，并验证其他访客无法访问素材和结果。校验成功后会删除临时状态文件；若中途失败，`xiaoying-demo-proof` 中的临时文件可能包含测试会话，应限制 Docker 访问，勿提交到源码。不要使用 `down -v` 删除现有数据卷。
 
 ## 部署、回滚与边界
 
