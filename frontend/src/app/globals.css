@@ -227,6 +227,7 @@ button[aria-pressed="true"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   gap: 16px;
+  align-items: start;
 }
 .eyebrow {
   font-size: 12px;
@@ -340,7 +341,12 @@ button[aria-pressed="true"] {
 }
 .upload-grid {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+.upload-progress {
+  color: var(--muted);
+  font-size: 13px;
 }
 .upload-slot {
   border: 1px solid var(--border);
@@ -360,7 +366,7 @@ button[aria-pressed="true"] {
   outline-offset: 4px;
 }
 .upload-target {
-  min-height: 150px;
+  min-height: 110px;
   border: 1px dashed #45454f;
   border-radius: 8px;
   display: grid;
@@ -370,7 +376,7 @@ button[aria-pressed="true"] {
 }
 .upload-target img {
   width: 100%;
-  height: 180px;
+  height: 110px;
   object-fit: contain;
 }
 .upload-placeholder {
@@ -457,6 +463,83 @@ button[aria-pressed="true"] {
   gap: 16px;
   align-items: center;
   margin-bottom: 20px;
+}
+.workspace-preview {
+  margin-bottom: 28px;
+}
+.workspace-preview-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.workspace-preview-heading h2 {
+  margin: 0;
+  font-size: 20px;
+}
+.workspace-preview-heading span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.workspace-preview-canvas {
+  min-height: 340px;
+  height: min(48vh, 480px);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  place-items: center;
+  overflow: hidden;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.workspace-preview-canvas img {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: contain;
+}
+.workspace-preview-message {
+  padding: 24px;
+  text-align: center;
+}
+.workspace-preview-message p,
+.workspace-preview > p {
+  color: var(--muted);
+  font-size: 13px;
+}
+.workspace-preview .preview-query-error {
+  color: #ffdcba;
+}
+.preview-query-error button {
+  padding: 7px 12px;
+  font-size: 13px;
+}
+.preview-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 13px;
+}
+.preview-steps li {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.task-actions button[aria-pressed="true"] {
+  border-color: var(--accent);
+}
+@media (max-width: 700px) {
+  .workspace-preview-canvas {
+    min-height: 260px;
+    height: 42vh;
+  }
 }
 .history-heading h2 {
   margin: 0;

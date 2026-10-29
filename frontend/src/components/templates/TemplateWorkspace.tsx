@@ -39,6 +39,11 @@ export function TemplateWorkspace({
 }: Props) {
   const identity = useIdentity();
   const { tracker } = useTaskTracker();
+  const scope = `${identity.user?.id ?? ""}:${identity.epoch}:${template.id}`;
+  const [selection, setSelection] = useState<{
+    scope: string;
+    id: string;
+  } | null>(null);
   return (
     <div className="workspace">
       <section className="panel creation-panel">
@@ -46,12 +51,6 @@ export function TemplateWorkspace({
           ← 返回模板
         </Link>
         <h1>{template.title}</h1>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className="detail-cover"
-          src={template.coverUrl}
-          alt={template.title}
-        />
         <p>{template.description}</p>
         <h2>上传素材</h2>
         <p>
@@ -71,6 +70,7 @@ export function TemplateWorkspace({
               userId={identity.user.id}
               showSimulationControls={showSimulationControls}
               onAccepted={(task) => {
+                setSelection({ scope, id: task.id });
                 tracker?.register(task, true);
                 onAccepted?.(task);
               }}
@@ -88,7 +88,15 @@ export function TemplateWorkspace({
         {identity.checking && <p role="status">正在确认账号…</p>}
       </section>
       <div className="panel">
-        <TaskHistory key={template.id} templateId={template.id} />
+        <TaskHistory
+          key={template.id}
+          templateId={template.id}
+          workspace={{
+            coverUrl: template.coverUrl,
+            selectedTaskId: selection?.scope === scope ? selection.id : null,
+            onSelect: (id) => setSelection({ scope, id }),
+          }}
+        />
       </div>
     </div>
   );
@@ -171,6 +179,10 @@ function CreationForm({
 
   return (
     <form onSubmit={submit}>
+      <p className="upload-progress" role="status">
+        已准备 {slots.filter((slot) => slot.asset && !slot.uploading).length} /{" "}
+        {template.requiredImageCount} 张图片
+      </p>
       <div className="upload-grid">
         {slots.map((value, index) => (
           <UploadSlot

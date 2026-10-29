@@ -7,12 +7,27 @@ import { useIdentity } from "@/components/identity/IdentityProvider";
 import { useTaskTracker } from "@/features/tasks/TaskTrackerProvider";
 import { getTaskHistory } from "@/lib/api/tasks";
 import { TaskCard } from "./TaskCard";
+import { WorkspacePreview } from "./WorkspacePreview";
 
-export function TaskHistory({ templateId }: { templateId?: string }) {
+export function TaskHistory({
+  templateId,
+  workspace,
+}: {
+  templateId?: string;
+  workspace?: {
+    coverUrl: string;
+    selectedTaskId: string | null;
+    onSelect: (id: string) => void;
+  };
+}) {
   const identity = useIdentity();
   const { tracker, state } = useTaskTracker();
   const scope = `${identity.user?.id ?? ""}:${identity.epoch}:${templateId ?? ""}`;
   const [pagination, setPagination] = useState({ scope, page: 1 });
+  const [exampleSelection, setExampleSelection] = useState<{
+    scope: string;
+    id: string;
+  } | null>(null);
   const page = pagination.scope === scope ? pagination.page : 1;
   const pageSize = appConfig.taskHistoryPageSize;
   const history = useQuery({
@@ -73,11 +88,46 @@ export function TaskHistory({ templateId }: { templateId?: string }) {
     )
     .slice(0, pageSize);
   const pages = Math.max(1, Math.ceil((history.data?.total ?? 0) / pageSize));
+  const selectedTracked = workspace?.selectedTaskId
+    ? state.tasks[workspace.selectedTaskId]
+    : undefined;
+  const selected =
+    items.find((item) => item.id === workspace?.selectedTaskId) ??
+    (selectedTracked?.createdHere &&
+    (!templateId || selectedTracked.snapshot.templateId === templateId)
+      ? selectedTracked.snapshot
+      : undefined) ??
+    items[0];
+  const showExample =
+    !!selected &&
+    exampleSelection?.scope === scope &&
+    exampleSelection.id === selected.id;
   return (
     <section
       className="history-panel"
       aria-label={templateId ? "当前模板制作记录" : "个人制作记录"}
     >
+      {workspace && (
+        <WorkspacePreview
+          coverUrl={workspace.coverUrl}
+          task={selected}
+          showExample={showExample}
+          onToggleExample={
+            selected
+              ? () =>
+                  setExampleSelection(
+                    showExample ? null : { scope, id: selected.id },
+                  )
+              : undefined
+          }
+          queryError={
+            selected ? state.tasks[selected.id]?.queryError : undefined
+          }
+          onResume={
+            selected ? () => void tracker?.resume(selected.id) : undefined
+          }
+        />
+      )}
       <div className="history-heading">
         <h2>{templateId ? "制作记录" : "我的记录"}</h2>
         <button
@@ -113,7 +163,19 @@ export function TaskHistory({ templateId }: { templateId?: string }) {
       {items.length > 0 && (
         <div className="task-grid">
           {items.map((task) => (
-            <TaskCard key={task.id} task={task} />
+            <TaskCard
+              key={task.id}
+              task={task}
+              onSelect={
+                workspace
+                  ? () => {
+                      setExampleSelection(null);
+                      workspace.onSelect(task.id);
+                    }
+                  : undefined
+              }
+              selected={task.id === selected?.id}
+            />
           ))}
         </div>
       )}

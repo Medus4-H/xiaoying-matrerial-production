@@ -3,26 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTaskTracker } from "@/features/tasks/TaskTrackerProvider";
-import type { TaskSnapshot, TaskStage } from "@/lib/api/types";
-
-const stageNames: Record<TaskStage, string> = {
-  ASSET_CHECK: "素材检查",
-  GENERATE: "模拟生成",
-  FINALIZE: "结果整理",
-};
-const statusNames = {
-  QUEUED: "等待处理",
-  RUNNING: "处理中",
-  SUCCEEDED: "制作成功",
-  FAILED: "制作失败",
-};
-const stepNames = {
-  PENDING: "等待",
-  RUNNING: "处理中",
-  SUCCEEDED: "完成",
-  FAILED: "失败",
-  SKIPPED: "已跳过",
-};
+import type { TaskSnapshot } from "@/lib/api/types";
+import { stageNames, statusNames, stepNames } from "./task-labels";
 
 function stepDuration(step: TaskSnapshot["steps"][number]): string {
   if (step.status !== "SUCCEEDED" && step.status !== "FAILED") return "";
@@ -35,9 +17,13 @@ function stepDuration(step: TaskSnapshot["steps"][number]): string {
 export function TaskCard({
   task,
   detailed = false,
+  onSelect,
+  selected = false,
 }: {
   task: TaskSnapshot;
   detailed?: boolean;
+  onSelect?: () => void;
+  selected?: boolean;
 }) {
   const { tracker, state } = useTaskTracker();
   const tracked = state.tasks[task.id];
@@ -108,6 +94,11 @@ export function TaskCard({
         </div>
       )}
       <div className="task-actions">
+        {onSelect && (
+          <button type="button" onClick={onSelect} aria-pressed={selected}>
+            在预览区查看
+          </button>
+        )}
         {current.status === "SUCCEEDED" && current.resultUrl && (
           <button
             ref={trigger}
