@@ -2,7 +2,7 @@
 
 当前完成架构、访客、账号注册登录与身份弹窗、模板浏览和筛选、上传与任务提交页面，以及后台三阶段处理、个人历史和结果接口。数据与任务状态由 Java/MyBatis/MySQL 管理。页面已支持任务自动跟踪、个人历史、结果预览和阶段耗时；容器验收及尚未验证的事项见 [阶段 D/E 记录](docs/logging-phase-de-status.md)和[最新验收复核](docs/acceptance-review-2026-10-29.md)和 [Task 9 记录](docs/task9-status.md)。
 
-最新创作台修复的代码验收基线为 `eaa0acb92cc9ca79432618ba093a0ff72531a832`；其后的交付整理提交仅更新说明。最新浏览器验收范围及未验证项见 [创作台复验](docs/workspace-preview-plan.md)。
+最新代码验收基线为 `25233dc5551b7b6e24d0423db9350829fcdb8943`；其后的交付整理提交仅更新说明。创作台浏览器验收范围见 [创作台复验](docs/workspace-preview-plan.md)，多站会话隔离与逐项复核见 [会话隔离记录](docs/session-isolation-plan.md)。
 
 ## 一键启动
 
@@ -25,7 +25,9 @@ docker compose up --build -d --wait
 | PUBLIC_ORIGIN | 允许的站点来源；未设置时按 FRONTEND_PORT 生成本地来源，远程/HTTPS 必须填写实际来源，无末尾斜杠；多来源逗号分隔 |
 | MYSQL_IMAGE/DATABASE/USER/PASSWORD/ROOT_PASSWORD | MySQL 版本和初始化库/凭据 |
 | AUTH_DEMO_CODE / AUTH_PASSWORD_ITERATIONS | 演示验证码（默认 123456）/ 密码 PBKDF2 迭代次数（默认 210000）；验证码仅 demo 生效 |
-| SESSION_COOKIE_NAME/TTL/SECURE | Cookie 名、有效期（7d/2h）、HTTPS 标志；HTTPS 部署设置 Secure=true |
+| SESSION_COOKIE_NAME / SESSION_LEGACY_COOKIE_NAME | Compose 中的 Cookie 名称前缀（默认 `studio_session`）及迁移时读取的旧完整名称（默认与前缀一致）；Compose 生成的当前名称为前缀加 `_` 和 `FRONTEND_PORT` |
+| SESSION_MIGRATION_MARKER_TTL_SECONDS | 防止旧身份再次回退的站点迁移标记有效期，默认 400 天；不得短于旧会话有效期，实际值至少为当前会话 TTL |
+| SESSION_TTL / SESSION_SECURE | Cookie 有效期（7d/2h）及 HTTPS 标志；HTTPS 部署设置 Secure=true |
 | APP_PROFILE | demo/prod；prod 禁止在任务请求中覆盖模拟参数 |
 | NEXT_PUBLIC_SHOW_SIMULATION_CONTROLS | 是否显示任务失败模拟选项，默认 false；修改后须重新构建前端，仅应配合 demo 模式 |
 | NEXT_PUBLIC_TASK_POLL_INTERVAL_MS / NEXT_PUBLIC_TASK_QUERY_TIMEOUT_MS | 任务轮询间隔和单次查询超时，默认 2000 / 10000 毫秒；修改后须重新构建前端 |
@@ -82,7 +84,7 @@ backend：Java 21、Boot 3.5.16、MyBatis Starter 3.0.5、Flyway；MySQL 8.4.7�
 
 建议使用单独的 Compose 项目与端口演示，避免影响已有资料。以下命令启用 demo 的页面模拟选项，并将生成阶段设为 15 秒，便于观察；变更前端构建变量需要重建镜像：
 
-**浏览器会话隔离：**不同端口的 `localhost` 共享同名 Cookie；仅更换 Compose 项目和端口不会隔离浏览器身份。建议使用单独的浏览器配置验收；或者在首次启动新的独立项目时设置不同的 `SESSION_COOKIE_NAME`，并在后续管理该项目的命令中保持一致。不要直接更改已有项目的 Cookie 名来冒充迁移：原访客会话可能暂时无法识别，未注册访客在原会话丢失后无法恢复。
+**浏览器会话隔离：**Cookie 本身不按端口隔离；本项目的 Compose 配置将 `FRONTEND_PORT` 加入会话 Cookie 名称，例如 3000 和 3109 站点分别使用 `studio_session_3000` 和 `studio_session_3109`，访客备份和诊断会话也使用各站点的名称。首次升级时，如果新名称和迁移标记均不存在，后端只在当前数据库验证旧 Cookie 有效后迁移会话及可验证的访客备份；不会删除旧 Cookie，也不会用旧 Cookie 覆盖已存在的新会话。迁移标记避免退出或失效后重新回退旧身份，其有效期须覆盖旧会话有效期；浏览器清除 Cookie 仍会影响恢复。已被覆盖、清除或过期的匿名访客会话不能恢复，注册账号可重新登录。修改端口或 Cookie 前缀后，请将 `SESSION_LEGACY_COOKIE_NAME` 设置为迁移前的完整 Cookie 名称，并保持各站点前缀和端口配置一致；在迁移前备份数据和保留浏览器会话。自建反向代理、非 Compose 部署或多个实例共用相同前缀与端口时，需要自行配置不同的名称；端口命名不是访问权限隔离的替代品。
 
 ```sh
 FRONTEND_PORT=3109 NEXT_PUBLIC_SHOW_SIMULATION_CONTROLS=true TASK_GENERATE_DELAY_MS=15000 \
