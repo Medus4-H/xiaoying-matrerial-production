@@ -97,7 +97,7 @@ class DiagnosticsTest {
         .contains("HttpOnly", "SameSite=Strict", "Path=/api/diagnostics")
         .doesNotContain(SECRET);
     String token = header.substring(header.indexOf('=') + 1, header.indexOf(';'));
-    Cookie cookie = new Cookie("studio_diagnostics", token);
+    Cookie cookie = new Cookie("user_diagnostics", token);
     assertThat(controller.session(request(null, cookie)).getStatusCode().value()).isEqualTo(200);
     assertThat(controller.logout(request("https://evil.test", cookie)).getStatusCode().value())
         .isEqualTo(403);
@@ -112,9 +112,30 @@ class DiagnosticsTest {
             .getFirst("Set-Cookie");
     Cookie expired =
         new Cookie(
-            "studio_diagnostics",
+            "user_diagnostics",
             expiredHeader.substring(expiredHeader.indexOf('=') + 1, expiredHeader.indexOf(';')));
     assertThat(expiring.session(request(null, expired)).getStatusCode().value()).isEqualTo(401);
+  }
+
+  @Test
+  void diagnosticCookiesAreScopedToTheSite() {
+    var buffer = mock(DiagnosticEvents.class);
+    var metrics = mock(TaskMetrics.class);
+    var first =
+        new SessionProperties("studio_session_3000", Duration.ofDays(1), false, List.of(ORIGIN));
+    var second =
+        new SessionProperties("studio_session_3534", Duration.ofDays(1), false, List.of(ORIGIN));
+    String a =
+        new DiagnosticController(props(60), first, buffer, metrics)
+            .login(new DiagnosticController.Login(SECRET), request(ORIGIN))
+            .getHeaders()
+            .getFirst("Set-Cookie");
+    String b =
+        new DiagnosticController(props(60), second, buffer, metrics)
+            .login(new DiagnosticController.Login(SECRET), request(ORIGIN))
+            .getHeaders()
+            .getFirst("Set-Cookie");
+    assertThat(a.substring(0, a.indexOf('='))).isNotEqualTo(b.substring(0, b.indexOf('=')));
   }
 
   @Test

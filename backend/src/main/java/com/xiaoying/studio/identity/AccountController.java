@@ -75,9 +75,9 @@ public class AccountController {
               log.atInfo()
                   .addKeyValue("event", "auth.register.succeeded")
                   .log("Account registered"));
-      return ResponseEntity.ok()
-          .cacheControl(CacheControl.noStore())
-          .body(identityController.view(user));
+      var response = ResponseEntity.ok().cacheControl(CacheControl.noStore());
+      identityController.markMigration(response);
+      return response.body(identityController.view(user));
     }
     String token = identityController.token(request);
     String oldBackup = identityController.token(request, identityController.visitorCookieName());
@@ -94,6 +94,7 @@ public class AccountController {
     var response =
         ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, identityController.cookie(session).toString());
+    identityController.markMigration(response);
     if (backup == null || backup.id().equals(visitor.id())) {
       response.header(
           HttpHeaders.SET_COOKIE, identityController.visitorCookie(token, visitor).toString());
@@ -152,6 +153,7 @@ public class AccountController {
     var response =
         ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, identityController.cookie(session).toString());
+    identityController.markMigration(response);
     if (visitor != null && (backup == null || backup.id().equals(visitor.id()))) {
       response.header(
           HttpHeaders.SET_COOKIE,
@@ -171,6 +173,7 @@ public class AccountController {
     String visitorToken = identityController.token(request, identityController.visitorCookieName());
     User visitor = resolveVisitor(visitorToken);
     var response = ResponseEntity.noContent();
+    identityController.markMigration(response);
     if (visitor != null) {
       response.header(
           HttpHeaders.SET_COOKIE,

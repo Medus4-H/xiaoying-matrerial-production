@@ -37,3 +37,29 @@ jobs:
       - name: Stop check services without deleting volumes
         if: always()
         run: docker compose -f compose.check.yml down
+  session-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start two isolated sites
+        run: |
+          FRONTEND_PORT=3541 FRONTEND_BIND_ADDRESS=127.0.0.1 TASK_ASSET_CHECK_DELAY_MS=50 TASK_GENERATE_DELAY_MS=100 TASK_FINALIZE_DELAY_MS=50 docker compose -p xiaoying-site-a up --build -d --wait --wait-timeout 300
+          FRONTEND_PORT=3542 FRONTEND_BIND_ADDRESS=127.0.0.1 TASK_ASSET_CHECK_DELAY_MS=50 TASK_GENERATE_DELAY_MS=100 TASK_FINALIZE_DELAY_MS=50 docker compose -p xiaoying-site-b up --build -d --wait --wait-timeout 300
+          docker network create xiaoying-session-verification
+          docker network connect xiaoying-session-verification xiaoying-site-a-frontend-1
+          docker network connect xiaoying-session-verification xiaoying-site-b-frontend-1
+      - name: Verify session migration and site isolation
+        run: |
+          docker run --rm --network xiaoying-session-verification \
+            -e SITE_A=http://xiaoying-site-a-frontend-1:3000 -e SITE_B=http://xiaoying-site-b-frontend-1:3000 \
+            -e ORIGIN_A=http://localhost:3541 -e ORIGIN_B=http://localhost:3542 \
+            -e COOKIE_A=studio_session_3541 -e COOKIE_B=studio_session_3542 \
+            -v "$PWD/checks:/checks:ro" -v "$PWD/demo-assets/uploads:/fixtures:ro" \
+            node:22.14.0-bookworm-slim node /checks/session-sites.mjs
+      - name: Stop isolated sites
+        if: always()
+        run: |
+          FRONTEND_PORT=3541 docker compose -p xiaoying-site-a down
+          FRONTEND_PORT=3542 docker compose -p xiaoying-site-b down
+          docker network rm xiaoying-session-verification || true

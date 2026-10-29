@@ -56,6 +56,8 @@ studio:
     password-iterations: ${AUTH_PASSWORD_ITERATIONS:210000}
   session:
     cookie-name: ${SESSION_COOKIE_NAME:studio_session}
+    legacy-cookie-name: ${SESSION_LEGACY_COOKIE_NAME:studio_session}
+    migration-marker-ttl-seconds: ${SESSION_MIGRATION_MARKER_TTL_SECONDS:34560000}
     ttl: ${SESSION_TTL:7d}
     secure: ${SESSION_SECURE:false}
     allowed-origins: ${PUBLIC_ORIGIN:http://localhost:3000}

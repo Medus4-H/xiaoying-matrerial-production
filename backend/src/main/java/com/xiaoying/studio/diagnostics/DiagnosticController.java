@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/diagnostics")
 @ConditionalOnProperty(prefix = "studio.diagnostics", name = "enabled", havingValue = "true")
 public class DiagnosticController {
-  private static final String COOKIE = "studio_diagnostics";
   private static final int MAX_SESSIONS = 20;
   private static final int MAX_ATTEMPTS = 10;
   private static final long ATTEMPT_WINDOW_SECONDS = 60;
@@ -167,13 +166,13 @@ public class DiagnosticController {
     Cookie[] cookies = request.getCookies();
     if (cookies == null) return null;
     for (Cookie cookie : cookies)
-      if (COOKIE.equals(cookie.getName()) && cookie.getValue().matches("[A-Za-z0-9_-]{43}"))
-        return cookie.getValue();
+      if (diagnosticCookieName().equals(cookie.getName())
+          && cookie.getValue().matches("[A-Za-z0-9_-]{43}")) return cookie.getValue();
     return null;
   }
 
   private String cookie(String value, long age) {
-    return ResponseCookie.from(COOKIE, value)
+    return ResponseCookie.from(diagnosticCookieName(), value)
         .httpOnly(true)
         .secure(sessions.secure())
         .sameSite("Strict")
@@ -181,6 +180,10 @@ public class DiagnosticController {
         .maxAge(age)
         .build()
         .toString();
+  }
+
+  private String diagnosticCookieName() {
+    return sessions.cookieName() + "_diagnostics";
   }
 
   private byte[] hash(String value) {
