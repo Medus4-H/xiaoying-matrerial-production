@@ -30,3 +30,5 @@
 素材上传和会话过期提示见 [Task 3 记录](./task3-status.md)；任务受理、后台执行、历史及结果 API 见 [Task 4 记录](./task4-status.md)。前端模板与访客交互见 [Task 5 记录](./task5-status.md)，上传与提交见 [Task 6 记录](./task6-status.md)，任务跟踪及历史见 [Task 7 记录](./task7-status.md)，边界与 CI 验证见 [Task 8 记录](./task8-status.md)。
 
 - 日志与错误国际化：见 [改造计划](./logging-plan.md)、[错误码盘点](./error-catalog-inventory.md)、[阶段 A/B 记录](./logging-phase-ab-status.md)、[阶段 C 记录](./logging-phase-c-status.md)和[阶段 D/E 记录](./logging-phase-de-status.md)。
+
+- 最终验收与投入：见 [Task 9 记录](./task9-status.md)和[投入记录](./effort.md)。

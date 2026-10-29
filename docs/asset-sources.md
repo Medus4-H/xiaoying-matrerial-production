@@ -17,7 +17,7 @@
 
 ## 预置结果图
 
-`results/template-*.jpg` 复用上述对应封面，随包提供供后续模拟生成；许可与来源与对应封面相同。V4 迁移修正示例结果路径，V2、V3 保持不变。当前尚未实现生成流程或结果接口。
+`results/template-*.jpg` 复用上述对应封面，随包提供给模拟生成流程；许可与来源与对应封面相同。V4 迁移修正示例结果路径，V2、V3 保持不变。当前后台会将预置图整理为任务结果，并提供仅所属用户可访问的结果接口；结果不会根据上传图片进行真实 AI 处理。
 
 Maven Wrapper 启动脚本来源：[Apache Maven Wrapper 3.3.4](https://github.com/apache/maven-wrapper/tree/maven-wrapper-3.3.4)，保留原始 Apache 2.0 许可证声明。
 
