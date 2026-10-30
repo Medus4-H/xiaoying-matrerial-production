@@ -1,14 +1,13 @@
 # 小影科技笔试开发文档
 
-项目根目录固定为 `./`。后续源码、配置、测试、素材和交付材料均位于该目录内，不把路径末尾的 `..` 解释为上一级 `./`。
-
-已完成架构、基础身份/模板、素材上传 API 和任务后台 API。见[基础阶段记录](./foundation-status.md)、[Task 3 记录](./task3-status.md)、[Task 4 记录](./task4-status.md)、[Task 5 记录](./task5-status.md)、[Task 6 记录](./task6-status.md)、[Task 7 记录](./task7-status.md)、[Task 8 记录](./task8-status.md)、[账号身份更新](./account-identity-status.md)、[注册与绑定设计](./account-contact-design.md)和[账号隔离修复记录](./account-isolation-status.md)。任务跟踪、历史和结果界面已接入，最终交付验收待完成。
+项目源码、配置、测试、素材和交付材料位于仓库根目录。功能完成程度、运行方法和已知限制以[项目 README](../README.md)及最新验收记录为准；各阶段记录保留当时的事实，不能单独代表当前状态。
 
 ## 阅读顺序
 
-1. [设计与验收规格](./2026-10-28-design.md)：需求边界、技术选型、架构、表结构、接口、状态机、页面、异常与验收标准。
-2. [分步开发计划](./2026-10-28-development-plan.md)：实施文件、接口依赖、检查步骤、工时、交付顺序和进度清单。
-3. [验收清单](./acceptance.md)：当前验证证据和最终交付仍需复核的内容。
+1. [项目 README](../README.md)：启动、配置、接口演示、交付边界和 AI 使用说明。
+2. [Task 9 验收记录](./task9-status.md)：当前浏览器验收和待验证事项；[本地流水线复验](./local-ci-2026-10-30.md)记录最新容器验证。
+3. [接口文档](./api.md)和[素材来源](./asset-sources.md)：接口约定和资源来源。
+4. [分步开发计划](./2026-10-28-development-plan.md)与[设计规格](./2026-10-28-design.md)：实施过程和设计依据；[验收清单](./acceptance.md)为历史检查。
 
 ## 已确认的约束
 
