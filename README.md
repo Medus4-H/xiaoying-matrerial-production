@@ -2,11 +2,11 @@
 
 当前完成架构、访客、账号注册登录与身份弹窗、模板浏览和筛选、上传与任务提交页面，以及后台三阶段处理、个人历史和结果接口。数据与任务状态由 Java/MyBatis/MySQL 管理。页面已支持任务自动跟踪、个人历史、结果预览和阶段耗时；容器验收及尚未验证的事项见 [阶段 D/E 记录](docs/logging-phase-de-status.md)和[最新验收复核](docs/acceptance-review-2026-10-29.md)和 [Task 9 记录](docs/task9-status.md)。
 
-最新代码验收基线为 `25233dc5551b7b6e24d0423db9350829fcdb8943`；其后的交付整理提交仅更新说明。创作台浏览器验收范围见 [创作台复验](docs/workspace-preview-plan.md)，多站会话隔离与逐项复核见 [会话隔离记录](docs/session-isolation-plan.md)。
+交付仓库：[Medus4-H/xiaoying-matrerial-production](https://github.com/Medus4-H/xiaoying-matrerial-production)，分支 `feat/logging-diagnostics`。**验收 commit：`280acbb00027f7f1fb27054a38824ebe00bc5bac`**；其应用代码基线为 `25233dc5551b7b6e24d0423db9350829fcdb8943`。验收 commit 之后的交付整理仅更新说明；验收该精确版本可切换到 `280acbb`。创作台浏览器验收范围见 [创作台复验](docs/workspace-preview-plan.md)，多站会话隔离与逐项复核见 [会话隔离记录](docs/session-isolation-plan.md)。
 
 用户手动上传示例后，已在独立站复验多任务、处理中刷新恢复、预置结果预览与部分小屏及键盘操作；本次未直接观察文件选择、上传过程、替换和移除，详见 [Task 9 记录](docs/task9-status.md)。刷新会清空当前上传位，不会删除已受理的任务记录。
 
-2026-10-30 在独立容器中复验了前后端检查、Compose 启动、核心接口和双站点会话隔离，结果与 Flyway/MySQL 版本提示见[本地流水线记录](docs/local-ci-2026-10-30.md)。GitHub 托管 Actions 和自动部署不属于本次验证。
+2026-10-30 在独立容器中复验了前后端检查、Compose 启动、核心接口和双站点会话隔离，结果与 Flyway/MySQL 版本提示见[本地流水线记录](docs/local-ci-2026-10-30.md)。目标仓库对验收 commit 的 [GitHub Actions push 运行](https://github.com/Medus4-H/xiaoying-matrerial-production/actions/runs/40988781248)已通过；没有自动部署工作流，也未进行线上部署。
 
 ## 一键启动
 
@@ -58,10 +58,10 @@ Java 环境配置统一位于 application.yml；前端名称和协议路径位�
 ## 结构与版本
 
 frontend：Next.js 16.4.3、React 19.2.4、TypeScript 5.9.3、Query 5.90.16；组件测试使用 Vitest 3.2.4、Testing Library、MSW 和 jsdom；package-lock.json 固定依赖，npm ci 构建。
-backend：Java 21、Boot 3.5.16、MyBatis Starter 3.0.5、Flyway；MySQL 8.4.7；Maven 3.9.9 容器构建。镜像尚未固定 digest。
+backend：Java 21、Boot 3.5.16、MyBatis Starter 3.0.5、Flyway；MySQL 8.4.7；Maven 3.9.9 容器构建。直接依赖版本由 `pom.xml` 指定，Maven Wrapper 固定 Maven 版本；没有单独锁定所有传递依赖。镜像尚未固定 digest。
 
 - frontend/src：页面、访客入口、模板组件、API 客户端。
-- backend/src：按 identity/template/asset/task/storage/common/config 分包。
+- backend/src：按 identity/template/asset/task/storage/common/config 分包；`backend/src/main/resources/db/migration` 包含数据库结构和初始化数据。
 - backend/src/main/resources/demo/covers：真实照片封面（JPEG，1000×1250），不是上传素材；上传阶段仍只接受 JPEG/PNG。
 - checks/foundation.mjs、checks/assets.mjs、checks/tasks.mjs：容器接口合同检查；checks/persistence.mjs：独立环境重建前后的数据持久化检查。
 - docs：[设计](docs/2026-10-28-design.md)、[计划](docs/2026-10-28-development-plan.md)、[基础阶段记录](docs/foundation-status.md)、[Task 4 记录](docs/task4-status.md)、[Task 5 记录](docs/task5-status.md)、[Task 6 记录](docs/task6-status.md)、[Task 7 记录](docs/task7-status.md)、[Task 8 记录](docs/task8-status.md)、[账号身份更新](docs/account-identity-status.md)、[注册与绑定设计](docs/account-contact-design.md)、[账号隔离修复记录](docs/account-isolation-status.md)、[验收清单](docs/acceptance.md)、[接口](docs/api.md)。
@@ -165,7 +165,9 @@ docker compose logs --no-color backend frontend
 docker compose down
 ```
 
-前端检查格式、lint、类型、单测和构建；Java verify 检查格式、运行单测及独立 MySQL 集成测试并打包；foundation-check、asset-check 和 task-check 对运行服务执行真实 API 检查，会创建访客、素材或任务记录，仅用于隔离演示环境，勿用于生产；task-check 需要 demo 配置。CI push/PR 配置包含这些入口，已在独立容器执行等价检查。2026-10-29 手动触发时 GitHub 返回 `Actions has been disabled for this user`，没有生成运行记录；仓库级 Actions 已启用，账号层面的禁用原因尚未确定。排查与本地验证见 [阶段 D/E 记录](docs/logging-phase-de-status.md)。真实连接中断和恢复的隔离演示见 [Task 8 记录](docs/task8-status.md)。
+前端检查格式、lint、类型、单测和构建；Java verify 检查格式、运行单测及独立 MySQL 集成测试并打包；foundation-check、asset-check 和 task-check 对运行服务执行真实 API 检查，会创建访客、素材或任务记录，仅用于隔离演示环境，勿用于生产；task-check 需要 demo 配置。CI 在 push 和 pull request 运行这些检查，验收 commit 的 GitHub push 已通过；pull request 触发条件已配置，但未单独运行 PR 验证。此前旧账号在 2026-10-29 无法触发的历史记录见 [阶段 D/E 记录](docs/logging-phase-de-status.md)。真实连接中断和恢复的隔离演示见 [Task 8 记录](docs/task8-status.md)。
+
+关键测试位置：`backend/src/test/java/com/xiaoying/studio/task/TaskRunnerTest.java` 检查阶段顺序及每阶段失败后的中断；`frontend/src/test/task-tracker.test.tsx` 检查多任务互不串扰、查询异常与执行失败区分、恢复查询和终态停止轮询。MySQL 集成测试及接口检查补充验证持久化和用户隔离。
 
 ## 复验容器重建后的数据
 
@@ -195,3 +197,5 @@ FRONTEND_PORT=3109 docker compose -p xiaoying-demo --profile tools run --rm --no
 前端检查包含 Prettier 格式、lint、类型、单测与构建；Java verify 包含 Spotless 格式、单测和独立 MySQL 集成测试。前端源码可使用 `npm run format`，Java 使用 `mvn -B -s settings.xml spotless:apply`，均应在容器中执行。原计划的检查入口改用 `compose.check.yml`，其中 mysql-test 使用临时存储，不连接演示数据库。
 
 后端提供 Apache Maven Wrapper 3.3.4，固定 Maven 3.9.9；容器检查使用相同版本的 Maven 镜像。Flyway V4 配置结果示例，已执行的 V1—V3 保持不变。
+
+素材及复用来源：封面和预置结果取自 Pexels，上传示例复用其中一张，Maven Wrapper 启动脚本来自 Apache Maven Wrapper；具体文件和链接见[素材来源](docs/asset-sources.md)。设计时参考了本地 vergeX 的交互思路及开源项目的公开文档，未引入 vergeX 的业务代码或私有素材；项目最初是否使用生成式脚手架没有可核实记录，不作推断。
